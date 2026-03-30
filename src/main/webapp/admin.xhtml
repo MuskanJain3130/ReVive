@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="jakarta.faces.core"
+                template="/template.xhtml">
+    
+    <ui:define name="content">
+        <h:form id="adminForm">
+            <div class="grid justify-content-center px-4">
+                <div class="col-12 mb-4 text-center">
+                    <h1 class="text-4xl font-black text-gray-900 flex align-items-center justify-content-center mb-2">
+                        <i class="pi pi-shield mr-4 text-6xl text-red-600"></i>Admin Command Center
+                    </h1>
+                    <p class="text-xl text-gray-400">Review and moderate product listings for ReVive Marketplace.</p>
+                </div>
+                
+                <div class="col-12">
+                    <div class="p-4 border-round-xl bg-white shadow-2">
+                        <p:dataTable id="productsTable" widgetVar="dtProducts" value="#{adminBean.allProducts}" var="p" paginator="true" rows="15" 
+                                     rowStyleClass="#{p.approvalStatus eq 'Pending' ? 'bg-yellow-50' : ''}"
+                                     filteredValue="#{adminBean.filteredProducts}"
+                                     globalFilterOnly="true">
+                            
+                            <f:facet name="header">
+                                <div class="flex justify-content-between align-items-center">
+                                    <h2 class="text-2xl font-bold m-0">Inventory &amp; Approvals</h2>
+                                    <span class="filter-container ui-input-icon-left">
+                                        <i class="pi pi-search"></i>
+                                        <p:inputText id="globalFilter" onkeyup="PF('dtProducts').filter()" placeholder="Search Products..." style="width:300px" />
+                                    </span>
+                                </div>
+                            </f:facet>
+
+                            <p:column headerText="Item Details" sortBy="#{p.title}" filterBy="#{p.title}" filterMatchMode="contains" style="min-width: 250px">
+                                <div class="font-bold text-gray-900">#{p.title}</div>
+                                <div class="text-xs text-gray-500">#{p.productCondition} | ₹#{p.price}</div>
+                            </p:column>
+                            
+                            <p:column headerText="Seller" sortBy="#{p.sellerid.username}" filterBy="#{p.sellerid.username}" filterMatchMode="contains">
+                                <div class="text-sm">#{p.sellerid.username}</div>
+                                <div class="text-xs text-gray-400">#{p.sellerid.email}</div>
+                            </p:column>
+                            
+                            <p:column headerText="Description">
+                                <div class="text-xs text-gray-600 max-h-3rem overflow-hidden text-overflow-ellipsis">#{p.description}</div>
+                            </p:column>
+                            
+                            <p:column headerText="Status" sortBy="#{p.approvalStatus}" filterBy="#{p.approvalStatus}" filterMatchMode="exact" styleClass="text-center">
+                                <f:facet name="filter">
+                                    <p:selectOneMenu onchange="PF('dtProducts').filter()" styleClass="ui-custom-filter">
+                                        <f:selectItem itemLabel="All Status" itemValue="#{null}" noSelectionOption="true" />
+                                        <f:selectItem itemLabel="Pending" itemValue="Pending" />
+                                        <f:selectItem itemLabel="Approved" itemValue="Approved" />
+                                        <f:selectItem itemLabel="Rejected" itemValue="Rejected" />
+                                    </p:selectOneMenu>
+                                </f:facet>
+                                <p:tag value="#{p.approvalStatus}" 
+                                       severity="#{p.approvalStatus eq 'Approved' ? 'success' : (p.approvalStatus eq 'Rejected' ? 'danger' : 'warning')}" />
+                            </p:column>
+                            
+                            <p:column headerText="Actions" styleClass="text-center">
+                                <p:commandButton icon="pi pi-check" title="Approve" 
+                                               rendered="#{p.approvalStatus eq 'Pending'}"
+                                               action="#{adminBean.approve(p.productid)}"
+                                               styleClass="rounded-button ui-button-success mr-2 shadow-2" 
+                                               update="@form" />
+                                
+                                <p:commandButton icon="pi pi-times" title="Reject" 
+                                               rendered="#{p.approvalStatus eq 'Pending'}"
+                                               action="#{adminBean.reject(p.productid)}"
+                                               styleClass="rounded-button ui-button-danger shadow-2" 
+                                               update="@form" />
+                                
+                                <p:commandButton icon="pi pi-eye" title="Details" 
+                                               styleClass="rounded-button ui-button-secondary ml-2" />
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </h:form>
+    </ui:define>
+</ui:composition>

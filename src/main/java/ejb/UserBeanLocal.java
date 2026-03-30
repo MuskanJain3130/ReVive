@@ -26,4 +26,12 @@ public interface UserBeanLocal {
     void requestReturn(ReturnRequests r);
 
     List<Products> myProducts(int userId);
+
+    Users getUserByUsername(String username);
+
+    List<Products> getAllProducts();
+
+    List<Products> getAllApprovedProducts();
+
+    void registerUser(Users u, int roleId);
 }

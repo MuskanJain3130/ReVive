@@ -65,22 +65,28 @@ public class Users implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
     @OneToMany(mappedBy = "userid")
+    @JsonbTransient
     private Collection<ShoppingCart> shoppingCartCollection;
     @OneToMany(mappedBy = "userid")
     @JsonbTransient
     private Collection<Addresses> addressesCollection;
     @OneToMany(mappedBy = "reviewerid")
+    @JsonbTransient
     private Collection<Reviews> reviewsCollection;
     @OneToMany(mappedBy = "userid")
+    @JsonbTransient
     private Collection<Wishlist> wishlistCollection;
     @OneToMany(mappedBy = "buyerid")
+    @JsonbTransient
     private Collection<Orders> ordersCollection;
     @JoinColumn(name = "roleid", referencedColumnName = "roleid")
     @ManyToOne
     private RoleMaster roleid;
     @OneToMany(mappedBy = "sellerid")
+    @JsonbTransient
     private Collection<Products> productsCollection;
     @OneToMany(mappedBy = "approvedBy")
+    @JsonbTransient
     private Collection<Products> productsCollection1;
 
     public Users() {

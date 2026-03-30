@@ -4,10 +4,6 @@
  */
 package rest;
 
-/**
- *
- * @author muskanjain
- */
 import ejb.UserBeanLocal;
 import entities.Orders;
 import entities.Products;
@@ -35,8 +31,6 @@ public class UserResource {
     @EJB
     private UserBeanLocal userBean;
 
-    // 1. Add Product 
-    //testing done
     @POST
     @Path("addProduct/{sellerid}")
     public Response addProduct(Products p, @PathParam("sellerid") int sellerid) {
@@ -44,8 +38,6 @@ public class UserResource {
         return Response.ok("Product added successfully").build();
     }
 
-    // 2. Update Product
-    //testing done
     @PUT
     @Path("updateProduct")
     public Response updateProduct(Products p) {
@@ -53,8 +45,6 @@ public class UserResource {
         return Response.ok("Product updated successfully").build();
     }
 
-    // 3. Add To Cart
-    //testing done
     @POST
     @Path("addToCart/{buyerid}/{productid}/{quantity}")
     public Response addToCart(ShoppingCart c,
@@ -65,7 +55,6 @@ public class UserResource {
         return Response.ok("Added to cart successfully").build();
     }
 
-    // 4. Place Order
     @POST
     @Path("placeOrder")
     public Response placeOrder(Orders order) {
@@ -73,8 +62,6 @@ public class UserResource {
         return Response.ok("Order placed successfully").build();
     }
 
-    // 5. Add Wishlist
-    //testing done
     @POST
     @Path("addWishlist/{buyerid}/{productid}")
     public Response addWishlist(Wishlist w,
@@ -84,8 +71,6 @@ public class UserResource {
         return Response.ok("Wishlist added successfully").build();
     }
 
-    // 6. Add Review
-    //testing done
     @POST
     @Path("addReview/{orderdetailid}/{reviewerid}")
     public Response addReview(Reviews r,
@@ -95,8 +80,6 @@ public class UserResource {
         return Response.ok("Review added successfully").build();
     }
 
-    // 7. Return Request
-    //testing done
     @POST
     @Path("requestReturn")
     public Response requestReturn(ReturnRequests r) {
@@ -104,11 +87,34 @@ public class UserResource {
         return Response.ok("Return request submitted successfully").build();
     }
 
-    // 8. My Products
-    //testing done
     @GET
     @Path("myProducts/{userId}")
     public List<Products> myProducts(@PathParam("userId") int userId) {
         return userBean.myProducts(userId);
+    }
+
+    @GET
+    @Path("allProducts")
+    public List<Products> getAllProducts() {
+        return userBean.getAllProducts();
+    }
+
+    @GET
+    @Path("approvedProducts")
+    public List<Products> getAllApprovedProducts() {
+        return userBean.getAllApprovedProducts();
+    }
+
+    @POST
+    @Path("register/{roleid}")
+    public Response registerUser(entities.Users u, @PathParam("roleid") int roleid) {
+        userBean.registerUser(u, roleid);
+        return Response.ok("User registered successfully").build();
+    }
+
+    @GET
+    @Path("getUserByUsername/{username}")
+    public entities.Users getUserByUsername(@PathParam("username") String username) {
+        return userBean.getUserByUsername(username);
     }
 }

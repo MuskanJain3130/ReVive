@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/template.xhtml">
+    
+    <ui:define name="content">
+        <div class="grid justify-content-center">
+            <div class="col-12 md:col-8">
+                <div class="p-5 border-round-2xl bg-white shadow-4">
+                    <div class="flex justify-content-between align-items-center mb-5">
+                        <h1 class="text-3xl font-black text-gray-900"><i class="bi bi-cart3 mr-2"></i>My Shopping Cart</h1>
+                        <p:commandButton value="Clear Cart" icon="pi pi-trash" styleClass="ui-button-danger ui-button-flat" onclick="localStorage.removeItem('revive_cart'); location.reload();" />
+                    </div>
+
+                    <div id="cart-container">
+                        <!-- JS will populate this -->
+                        <div class="text-center py-5">
+                            <i class="bi bi-cart-x text-6xl text-gray-200 mb-3 block"></i>
+                            <p class="text-gray-400 font-medium text-xl">Your cart is currently empty.</p>
+                            <h:link outcome="index" value="Go to Marketplace" styleClass="mt-4 inline-block text-primary-600 font-bold no-underline hover:underline" />
+                        </div>
+                    </div>
+
+                    <div id="cart-footer" class="hidden mt-6 pt-4 border-top-1 border-gray-100 flex justify-content-between align-items-center">
+                        <div class="text-xl font-bold text-gray-900">Total: <span id="cart-total" class="text-primary-600">₹0</span></div>
+                        <p:commandButton value="Checkout Now" icon="pi pi-credit-card" styleClass="rounded-button ui-button-primary py-2 px-4 shadow-4" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                let cart = JSON.parse(localStorage.getItem('revive_cart') || '[]');
+                let container = document.getElementById('cart-container');
+                let footer = document.getElementById('cart-footer');
+                let totalSpan = document.getElementById('cart-total');
+
+                if (cart.length > 0) {
+                    container.innerHTML = '';
+                    let total = 0;
+                    cart.forEach((item, index) => {
+                        let price = item.price || 0;
+                        let qty = item.quantity || 1; 
+                        let title = item.title || 'Unknown Product';
+                        let subtotal = price * qty;
+                        total += subtotal;
+                        
+                        let itemHtml = '<div class="flex align-items-center justify-content-between py-3 border-bottom-1 border-gray-50">' +
+                                '<div class="flex align-items-center">' +
+                                    '<div class="bg-gray-100 p-2 border-round mr-3">' +
+                                        '<i class="bi bi-box-seam text-2xl text-gray-400"></i>' +
+                                    '</div>' +
+                                    '<div>' +
+                                        '<div class="font-bold text-gray-900">' + title + '</div>' +
+                                        '<div class="text-sm text-gray-400">Qty: ' + qty + ' x ₹' + price + '</div>' +
+                                    '</div>' +
+                                '</div>' +
+                                '<div class="font-bold text-gray-900">₹' + subtotal + '</div>' +
+                            '</div>';
+                            
+                        container.insertAdjacentHTML('beforeend', itemHtml);
+                    });
+                    totalSpan.innerText = '₹' + total;
+                    footer.classList.remove('hidden');
+                    footer.classList.add('flex');
+                }
+            });
+        </script>
+    </ui:define>
+</ui:composition>

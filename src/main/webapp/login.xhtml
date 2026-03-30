@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/template.xhtml">
+    
+    <ui:define name="content">
+        <div class="flex flex-column align-items-center justify-content-center" style="min-height: 70vh">
+            <div class="card-premium text-center" style="width: 100%; max-width: 420px">
+                <i class="bi bi-person-circle text-7xl text-primary mb-4"></i>
+                <h1 class="text-3xl font-black text-gray-900 mb-2">Welcome Back</h1>
+                <p class="text-gray-500 mb-6 font-medium">Log in to manage your ReVive treasures.</p>
+                
+                <h:form id="loginForm">
+                    <p:messages id="msgs" showDetail="false" closable="true" />
+                    
+                    <div class="field mb-4 text-left">
+                        <p:outputLabel for="username" value="Username" styleClass="block mb-2 font-bold text-gray-700" />
+                        <p:inputText id="username" value="#{authBean.username}" placeholder="e.g. admin" 
+                                   required="true" requiredMessage="Username is required" />
+                    </div>
+                    
+                    <div class="field mb-6 text-left">
+                        <p:outputLabel for="password" value="Password" styleClass="block mb-2 font-bold text-gray-700" />
+                        <p:password id="password" value="#{authBean.password}" placeholder="••••••••" 
+                                  toggleMask="true" required="true" requiredMessage="Password is required" />
+                    </div>
+                    
+                    <p:commandButton value="Sign In" action="#{authBean.login}" update="msgs"
+                                   styleClass="ui-button-primary w-full shadow-4" />
+                </h:form>
+                
+                <div class="mt-8 pt-4 border-top-1 border-gray-100 flex justify-content-between align-items-center">
+                    <span class="text-sm text-gray-400 font-semibold">New to ReVive?</span>
+                    <h:link outcome="register" value="Create Account" styleClass="text-sm font-bold text-primary no-underline hover:underline" />
+                </div>
+            </div>
+            
+            <div class="mt-6 flex gap-4 opacity-60 hover:opacity-100 transition-opacity">
+                <div class="px-3 py-1 border-round-lg bg-white border-1 border-gray-200 text-xs text-gray-400 font-mono">admin / 123</div>
+                <div class="px-3 py-1 border-round-lg bg-white border-1 border-gray-200 text-xs text-gray-400 font-mono">seller / 123</div>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

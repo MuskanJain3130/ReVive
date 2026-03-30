@@ -83,6 +83,9 @@ public class Products implements Serializable {
     @Column(name = "approved_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date approvedAt;
+    @Size(max = 255)
+    @Column(name = "image_url")
+    private String imageUrl;
     @OneToMany(mappedBy = "productid")
     @JsonbTransient
     private Collection<ShoppingCart> shoppingCartCollection;
@@ -191,6 +194,14 @@ public class Products implements Serializable {
 
     public void setApprovedAt(Date approvedAt) {
         this.approvedAt = approvedAt;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     @XmlTransient

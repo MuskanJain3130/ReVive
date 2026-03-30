@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="jakarta.faces.core"
+                template="/template.xhtml">
+    
+    <ui:define name="content">
+        <h:form id="sellerForm" enctype="multipart/form-data">
+            <div class="grid">
+                <!-- Add New Product Card -->
+                <div class="col-12 lg:col-4">
+                    <div class="card-premium">
+                        <h2 class="text-2xl font-black mb-5 flex align-items-center">
+                            <i class="pi pi-plus-circle mr-3 text-primary text-3xl"></i>List New Item
+                        </h2>
+                        
+                        <div class="field mb-4">
+                            <p:outputLabel for="title" value="Product Title" styleClass="block mb-2 font-bold text-gray-700" />
+                            <p:inputText id="title" value="#{productBean.newProduct.title}" placeholder="What are you selling?" required="true" />
+                        </div>
+                        
+                        <div class="field mb-4">
+                            <p:outputLabel for="price" value="Price (₹)" styleClass="block mb-2 font-bold text-gray-700" />
+                            <p:inputNumber id="price" value="#{productBean.newProduct.price}" symbol="₹ " decimalPlaces="2" required="true" />
+                        </div>
+                        
+                        <div class="field mb-4">
+                            <p:outputLabel for="condition" value="Item Condition" styleClass="block mb-2 font-bold text-gray-700" />
+                            <p:selectOneMenu id="condition" value="#{productBean.newProduct.productCondition}">
+                                <f:selectItem itemLabel="New" itemValue="New" />
+                                <f:selectItem itemLabel="Like New" itemValue="Like New" />
+                                <f:selectItem itemLabel="Good" itemValue="Good" />
+                                <f:selectItem itemLabel="Fair" itemValue="Fair" />
+                                <f:selectItem itemLabel="Poor" itemValue="Poor" />
+                            </p:selectOneMenu>
+                        </div>
+                        
+                        <div class="field mb-4">
+                            <p:outputLabel for="file" value="Product Image" styleClass="block mb-2 font-bold text-gray-700" />
+                            <p:fileUpload id="file" value="#{productBean.file}" mode="simple" skinSimple="true" />
+                        </div>
+                        
+                        <div class="field mb-6">
+                            <p:outputLabel for="description" value="Full Description" styleClass="block mb-2 font-bold text-gray-700" />
+                            <p:inputTextarea id="description" value="#{productBean.newProduct.description}" rows="4" placeholder="Describe your item's history, features, or any flaws..." />
+                        </div>
+                        
+                        <p:commandButton value="Post Item for Approval" action="#{productBean.addProduct}" 
+                                       styleClass="ui-button-primary w-full shadow-4" />
+                    </div>
+                </div>
+                
+                <!-- My Listings Table -->
+                <div class="col-12 lg:col-8">
+                    <div class="card-premium">
+                        <h2 class="text-2xl font-black mb-5 flex align-items-center">
+                            <i class="pi pi-list mr-3 text-primary text-3xl"></i>My Listings
+                        </h2>
+                        
+                        <p:dataTable value="#{productBean.myProducts}" var="myProd" paginator="true" rows="8" 
+                                     styleClass="ui-datatable-striped ui-datatable-hover border-round-xl overflow-hidden">
+                            <p:column headerText="Item" styleClass="font-bold py-3">
+                                #{myProd.title}
+                            </p:column>
+                            <p:column headerText="Price" styleClass="font-semibold text-primary">
+                                ₹#{myProd.price}
+                            </p:column>
+                            <p:column headerText="Status" styleClass="text-center">
+                                <p:tag value="#{myProd.approvalStatus}" 
+                                       severity="#{myProd.approvalStatus eq 'Approved' ? 'success' : (myProd.approvalStatus eq 'Rejected' ? 'danger' : 'warning')}" />
+                            </p:column>
+                            <p:column headerText="Date Listed" styleClass="text-gray-400 text-xs">
+                                <h:outputText value="#{myProd.createdAt}">
+                                    <f:convertDateTime pattern="dd MMM yyyy" />
+                                </h:outputText>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </h:form>
+    </ui:define>
+</ui:composition>
