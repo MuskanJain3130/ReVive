@@ -94,15 +94,15 @@ public class AuthManagedBean implements Serializable {
     }
 
     public boolean isAdmin() {
-        return securityContext.isCallerInRole("admin");
+        return securityContext.isCallerInRole("admin") || securityContext.isCallerInRole("Admin");
     }
 
     public boolean isUser() {
-        return securityContext.isCallerInRole("user");
+        return securityContext.isCallerInRole("user") || securityContext.isCallerInRole("User");
     }
 
     public boolean isSeller() {
-        return securityContext.isCallerInRole("seller") || securityContext.isCallerInRole("admin");
+        return securityContext.isCallerInRole("seller") || securityContext.isCallerInRole("Seller") || isAdmin();
     }
 
     // Getters and Setters

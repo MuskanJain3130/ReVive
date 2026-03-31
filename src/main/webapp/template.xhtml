@@ -82,9 +82,10 @@
                     <h:link outcome="index" value="Marketplace" styleClass="nav-item" />
                     
                     <h:panelGroup rendered="#{authBean.loggedIn}">
-                        <h:link outcome="seller" value="Sell" styleClass="nav-item" />
-                        <h:link outcome="admin" value="Admin Panel" styleClass="nav-item" rendered="#{authBean.admin}" />
-                        <h:link outcome="cart" styleClass="nav-item mr-2">
+                        <h:link outcome="seller" value="Sell" styleClass="nav-item" rendered="#{not authBean.admin}" />
+                        <h:link outcome="admin" value="Admin Panel" styleClass="nav-item text-red-600 font-bold" rendered="#{authBean.admin}" />
+                        
+                        <h:link outcome="cart" styleClass="nav-item mr-2" rendered="#{not authBean.admin}">
                             <i class="bi bi-cart3 mr-1"></i>Cart
                         </h:link>
                         <span class="text-xs text-gray-500">Welcome, #{authBean.currentUser.username}</span>
