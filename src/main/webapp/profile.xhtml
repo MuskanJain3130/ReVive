@@ -1,0 +1,228 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/template.xhtml">
+
+    <ui:define name="title">My Profile - ReVive</ui:define>
+
+    <ui:define name="content">
+        <div class="grid justify-content-center">
+            <div class="col-12 lg:col-10">
+                <div class="section-header">
+                    <h1 class="section-title"><i class="bi bi-person-circle mr-2"></i> User Profile</h1>
+                </div>
+
+                <p:tabView styleClass="mt-3 shadow-2 border-round-xl overflow-hidden">
+                    <!-- Tab 1: Profile Details -->
+                    <p:tab title="My Details">
+                        <h:form id="profileForm" styleClass="p-4">
+                            <p:messages id="profileMsgs" closable="true" />
+                            <div class="grid">
+                                <div class="col-12 md:col-6 field mb-4">
+                                    <p:outputLabel for="username" value="Username" styleClass="font-bold block mb-2" />
+                                    <p:inputText id="username" value="#{profileBean.userProfile.username}" styleClass="w-full" required="true" />
+                                </div>
+                                <div class="col-12 md:col-6 field mb-4">
+                                    <p:outputLabel for="email" value="Email Address" styleClass="font-bold block mb-2" />
+                                    <p:inputText id="email" value="#{profileBean.userProfile.email}" styleClass="w-full" required="true" />
+                                </div>
+                                <div class="col-12 md:col-6 field mb-4">
+                                    <p:outputLabel for="phone" value="Phone Number" styleClass="font-bold block mb-2" />
+                                    <p:inputText id="phone" value="#{profileBean.userProfile.phone}" styleClass="w-full" />
+                                </div>
+                                <div class="col-12 md:col-6 field mb-4">
+                                    <p:outputLabel value="Joined On" styleClass="font-bold block mb-2" />
+                                    <h:outputText value="#{profileBean.userProfile.createdAt}" styleClass="text-gray-500 block p-2 surface-100 border-round">
+                                        <f:convertDateTime pattern="MMMM dd, yyyy" />
+                                    </h:outputText>
+                                </div>
+                            </div>
+                            <p:commandButton value="Update Profile" action="#{profileBean.updateProfile}" 
+                                             update="profileMsgs" styleClass="ui-button-primary px-5 py-2 font-bold" />
+                        </h:form>
+                    </p:tab>
+
+                    <!-- Tab 2: Order History (Buyer) -->
+                    <p:tab title="Order History">
+                        <div class="p-3">
+                            <p:dataTable id="ordersTable" value="#{profileBean.myOrders}" var="order" 
+                                         emptyMessage="No orders found." 
+                                         paginator="true" rows="10" 
+                                         styleClass="ui-datatable-striped shadow-1">
+                                
+                                <p:column headerText="Order ID" width="100">
+                                    <p:commandLink value="##{order.orderid}" 
+                                                   update=":orderDetailDialog" 
+                                                   oncomplete="PF('orderDialog').show()"
+                                                   styleClass="font-bold text-primary underline">
+                                        <f:setPropertyActionListener value="#{order}" target="#{profileBean.selectedOrder}" />
+                                    </p:commandLink>
+                                </p:column>
+                                
+                                <p:column headerText="Date">
+                                    <h:outputText value="#{order.orderdate}">
+                                        <f:convertDateTime pattern="MMM dd, yyyy" />
+                                    </h:outputText>
+                                </p:column>
+                                
+                                <p:column headerText="Status">
+                                    <span class="px-3 py-1 border-round-2xl text-xs font-bold uppercase
+                                          #{order.status == 'Placed' ? 'bg-blue-100 text-blue-700' : 
+                                            order.status == 'Shipped' ? 'bg-orange-100 text-orange-700' : 
+                                            order.status == 'Delivered' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}">
+                                        #{order.status}
+                                    </span>
+                                </p:column>
+                                
+                                <p:column headerText="Total">
+                                    <ui:repeat value="#{order.paymentsCollection}" var="payment">
+                                        <h:outputText value="₹#{payment.amount}" styleClass="font-bold" />
+                                    </ui:repeat>
+                                </p:column>
+                                
+                                <p:column headerText="Summary" width="200">
+                                    <ui:repeat value="#{order.orderDetailsCollection}" var="detail" size="1">
+                                        <div class="text-xs font-bold text-gray-800">#{detail.productid.title}</div>
+                                    </ui:repeat>
+                                    <h:outputText value="+ #{order.orderDetailsCollection.size() - 1} more items" 
+                                                 rendered="#{order.orderDetailsCollection.size() > 1}" 
+                                                 styleClass="text-gray-400 text-xs" />
+                                    <h:outputText value="1 Product" rendered="#{order.orderDetailsCollection.size() == 1}" styleClass="text-gray-400 text-xs" />
+                                    <h:outputText value="No products found" rendered="#{empty order.orderDetailsCollection}" styleClass="text-gray-400 text-xs" />
+                                </p:column>
+
+                                <p:column headerText="Action" width="80" style="text-align:center">
+                                    <p:commandButton icon="pi pi-search" title="View Details"
+                                                     update=":orderDetailDialog" 
+                                                     oncomplete="PF('orderDialog').show()"
+                                                     styleClass="ui-button-rounded ui-button-info ui-button-flat">
+                                        <f:setPropertyActionListener value="#{order}" target="#{profileBean.selectedOrder}" />
+                                    </p:commandButton>
+                                </p:column>
+                            </p:dataTable>
+                        </div>
+                    </p:tab>
+
+                    <!-- Tab 3: Sales Overview (Seller) -->
+                    <p:tab title="Sales Overview" rendered="#{authBean.seller}">
+                        <div class="p-3">
+                            <p:dataTable value="#{profileBean.mySales}" var="sale" 
+                                         emptyMessage="No sales found." 
+                                         paginator="true" rows="10" 
+                                         styleClass="ui-datatable-striped shadow-1">
+                                <p:column headerText="Order ID" width="100">
+                                    <h:outputText value="##{sale.orderid.orderid}" />
+                                </p:column>
+                                <p:column headerText="Product">
+                                    <h:outputText value="#{sale.productid.title}" styleClass="font-medium" />
+                                </p:column>
+                                <p:column headerText="Qty">
+                                    <h:outputText value="#{sale.quantity}" />
+                                </p:column>
+                                <p:column headerText="Price">
+                                    <h:outputText value="₹#{sale.price}" />
+                                </p:column>
+                                <p:column headerText="Total">
+                                    <h:outputText value="₹#{sale.price * sale.quantity}" styleClass="font-bold text-green-700" />
+                                </p:column>
+                                <p:column headerText="Buyer">
+                                    <h:outputText value="#{sale.orderid.buyerid.username}" styleClass="text-gray-600 text-sm" />
+                                </p:column>
+                                <p:column headerText="Order Status">
+                                    <span class="text-xs font-semibold px-2 py-1 border-round bg-gray-100">#{sale.orderid.status}</span>
+                                </p:column>
+                            </p:dataTable>
+                        </div>
+                    </p:tab>
+                </p:tabView>
+            </div>
+        </div>
+
+        <!-- Order Detail Dialog -->
+        <p:dialog id="orderDetailDialog" header="Order Details ##{profileBean.selectedOrder.orderid}" 
+                  widgetVar="orderDialog" modal="true" width="600" responsive="true" showEffect="fade" 
+                  hideEffect="fade" styleClass="order-dialog">
+            
+            <h:panelGroup rendered="#{not empty profileBean.selectedOrder}" layout="block">
+                <div class="flex justify-content-between mb-4 border-bottom-1 border-gray-200 pb-3">
+                    <div>
+                        <span class="text-gray-500 text-sm block">Order Date</span>
+                        <span class="font-bold">
+                            <h:outputText value="#{profileBean.selectedOrder.orderdate}">
+                                <f:convertDateTime pattern="MMMM dd, yyyy HH:mm" />
+                            </h:outputText>
+                        </span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-gray-500 text-sm block">Status</span>
+                        <span class="px-3 py-1 border-round-2xl text-xs font-bold bg-blue-100 text-blue-700 uppercase">
+                            #{profileBean.selectedOrder.status}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="mb-4 p-3 bg-gray-50 border-round-lg">
+                    <div class="flex justify-content-between align-items-center px-4 relative">
+                        <div class="text-center z-1">
+                            <i class="bi bi-patch-check-fill text-blue-500 text-xl block"></i>
+                            <span class="text-xs font-bold mt-1 block">Placed</span>
+                        </div>
+                        <div class="flex-1 border-top-2 mx-1 #{profileBean.selectedOrder.status == 'Shipped' or profileBean.selectedOrder.status == 'Delivered' ? 'border-blue-500' : 'border-gray-300'}"></div>
+                        <div class="text-center z-1">
+                            <i class="bi #{profileBean.selectedOrder.status == 'Shipped' or profileBean.selectedOrder.status == 'Delivered' ? 'bi-truck text-blue-500' : 'bi-truck text-gray-300'} text-xl block"></i>
+                            <span class="text-xs font-bold mt-1 block">Shipped</span>
+                        </div>
+                        <div class="flex-1 border-top-2 mx-1 #{profileBean.selectedOrder.status == 'Delivered' ? 'border-blue-500' : 'border-gray-300'}"></div>
+                        <div class="text-center z-1">
+                            <i class="bi #{profileBean.selectedOrder.status == 'Delivered' ? 'bi-box-seam-fill text-blue-500' : 'bi-box-seam text-gray-300'} text-xl block"></i>
+                            <span class="text-xs font-bold mt-1 block">Delivered</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h3 class="text-xs font-bold uppercase text-gray-400 mb-2 tracking-wider">Shipping Address</h3>
+                    <div class="p-3 surface-50 border-round-lg border-1 border-gray-100">
+                        <span class="block font-bold text-gray-800">#{profileBean.selectedOrder.addressid.fullname}</span>
+                        <span class="block text-sm text-gray-600">#{profileBean.selectedOrder.addressid.street}</span>
+                        <span class="block text-sm text-gray-600">#{profileBean.selectedOrder.addressid.city}, #{profileBean.selectedOrder.addressid.state} #{profileBean.selectedOrder.addressid.zipcode}</span>
+                        <span class="block text-sm text-gray-600 mt-1"><i class="bi bi-telephone mr-1"></i> #{profileBean.selectedOrder.addressid.phone}</span>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h3 class="text-xs font-bold uppercase text-gray-400 mb-2 tracking-wider">Items Ordered</h3>
+                    <div class="max-h-20rem overflow-auto">
+                        <ui:repeat value="#{profileBean.selectedOrder.orderDetailsCollection}" var="detail">
+                            <div class="flex align-items-center justify-content-between py-3 border-bottom-1 border-gray-100">
+                                <div class="flex align-items-center">
+                                    <div class="w-3rem h-3rem bg-gray-100 border-round flex align-items-center justify-content-center mr-3">
+                                        <i class="bi bi-box-seam text-gray-400 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <span class="block font-bold text-gray-800">#{detail.productid.title}</span>
+                                        <span class="text-xs text-gray-500">Qty: #{detail.quantity} × ₹#{detail.price}</span>
+                                    </div>
+                                </div>
+                                <span class="font-bold text-gray-900">₹#{detail.price * detail.quantity}</span>
+                            </div>
+                        </ui:repeat>
+                    </div>
+                </div>
+
+                <div class="flex justify-content-between align-items-center pt-3 mt-2 border-top-2 border-gray-100">
+                    <span class="text-xl font-bold text-gray-700">Order Total</span>
+                    <ui:repeat value="#{profileBean.selectedOrder.paymentsCollection}" var="payment">
+                        <span class="text-2xl font-bold text-primary">₹#{payment.amount}</span>
+                    </ui:repeat>
+                </div>
+                
+                <div class="mt-4 flex justify-content-end">
+                    <p:commandButton value="Close" onclick="PF('orderDialog').hide()" styleClass="ui-button-secondary ui-button-flat" />
+                </div>
+            </h:panelGroup>
+        </p:dialog>
+    </ui:define>
+</ui:composition>

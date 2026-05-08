@@ -1,0 +1,213 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/template.xhtml">
+
+    <ui:define name="title">Secure Checkout - ReVive</ui:define>
+
+    <ui:define name="content">
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+        
+        <h:form prependId="false">
+            <h:inputHidden id="cartJsonField" value="#{checkoutBean.cartJson}" />
+            <p:commandButton id="hiddenSubmitBtn" style="display:none" action="#{checkoutBean.parseCart}" update="checkoutContainer" oncomplete="console.log('Cart Loaded');" />
+        </h:form>
+
+        <script>
+            function syncCartData() {
+                var cart = localStorage.getItem('revive_cart') || '[]';
+                // Sync to specific IDs to avoid JSF validation issues
+                var f1 = document.getElementById('cartJsonField');
+                var f2 = document.getElementById('paymentCartJson');
+                if (f1) f1.value = cart;
+                if (f2) f2.value = cart;
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                syncCartData();
+                var cartField = document.getElementById('cartJsonField');
+                if (!cartField || !cartField.value || cartField.value.trim() === '' || cartField.value === '[]') {
+                    document.getElementById('hiddenSubmitBtn').click();
+                }
+            });
+            
+            function launchRazorpay(orderId, keyId, amountInSubunits, username, email) {
+                var options = {
+                    "key": keyId, 
+                    "amount": amountInSubunits, 
+                    "currency": "INR",
+                    "name": "ReVive Marketplace",
+                    "description": "Secure Order Payment",
+                    "order_id": orderId,
+                    "handler": function (response){
+                        syncCartData();
+                        document.getElementById('rzpPaymentId').value = response.razorpay_payment_id;
+                        document.getElementById('completeOrderBtn').click();
+                    },
+                    "prefill": { "name": username, "email": email },
+                    "theme": { "color": "#2563eb" }
+                };
+                var rzp1 = new Razorpay(options);
+                rzp1.open();
+            }
+            
+            function clearCartAndRedirect() {
+                localStorage.removeItem('revive_cart');
+                window.location.href = 'success.xhtml';
+            }
+        </script>
+
+        <div class="grid justify-content-center mt-4">
+            <div class="col-12 md:col-10 lg:col-8">
+                
+                <h:panelGroup id="checkoutContainer" layout="block">
+                    <!-- Hidden Sync Form -->
+                    <h:form prependId="false">
+                        <h:inputHidden id="cartJsonField" value="#{checkoutBean.cartJson}" />
+                        <p:commandButton id="hiddenSubmitBtn" style="display:none" action="#{checkoutBean.parseCart}" update="checkoutContainer" />
+                    </h:form>
+
+                    <!-- Empty Cart Protection -->
+                    <h:panelGroup rendered="#{empty checkoutBean.parsedCartItems}">
+                        <div class="p-5 border-round-2xl bg-white shadow-4 text-center">
+                            <i class="bi bi-cart-x text-6xl text-gray-300 block mb-3"></i>
+                            <h2 class="text-xl font-bold mb-3">Your Cart is Empty</h2>
+                            <p class="text-gray-500 mb-4">You cannot proceed to checkout without items.</p>
+                            <h:link outcome="index" value="Return to Shop" styleClass="ui-button ui-button-primary" />
+                        </div>
+                    </h:panelGroup>
+
+                    <h:panelGroup rendered="#{not empty checkoutBean.parsedCartItems}">
+                        <div class="grid">
+                            
+                            <!-- Left Col: Addresses -->
+                            <div class="col-12 md:col-7">
+                                <div class="p-4 border-round-xl bg-white shadow-2 mb-4">
+                                    <h2 class="text-xl font-bold mb-4 border-bottom-1 border-gray-200 pb-2"><i class="bi bi-geo-alt mr-2 text-primary"></i> Delivery Address</h2>
+                                    
+                                    <h:form id="addressForm">
+                                        <h:panelGroup rendered="#{not empty checkoutBean.userAddresses}">
+                                            <p:selectOneRadio value="#{checkoutBean.selectedAddressId}" layout="pageDirection">
+                                                <f:selectItems value="#{checkoutBean.userAddresses}" var="addr" 
+                                                               itemValue="#{addr.addressid}" 
+                                                               itemLabel="#{addr.fullname} - #{addr.street}, #{addr.city}" />
+                                                <p:ajax update=":paymentForm" />
+                                            </p:selectOneRadio>
+                                        </h:panelGroup>
+
+                                        <p:commandButton value="#{checkoutBean.showNewAddressForm ? 'Cancel' : 'Add New Address'}" 
+                                                         action="#{checkoutBean.toggleAddressForm}" 
+                                                         update="@form" 
+                                                         styleClass="ui-button-flat mt-2" 
+                                                         icon="#{checkoutBean.showNewAddressForm ? 'pi pi-times' : 'pi pi-plus'}" />
+                                                         
+                                        <h:panelGroup rendered="#{checkoutBean.showNewAddressForm}" layout="block" styleClass="mt-3 p-3 surface-50 border-round">
+                                            <div class="field mb-2">
+                                                <p:outputLabel for="fn" value="Full Name" styleClass="text-xs font-bold" />
+                                                <p:inputText id="fn" value="#{checkoutBean.newAddress.fullname}" required="true" styleClass="w-full" />
+                                            </div>
+                                            <div class="field mb-2">
+                                                <p:outputLabel for="ph" value="Phone" styleClass="text-xs font-bold" />
+                                                <p:inputText id="ph" value="#{checkoutBean.newAddress.phone}" required="true" styleClass="w-full" />
+                                            </div>
+                                            <div class="field mb-2">
+                                                <p:outputLabel for="st" value="Street" styleClass="text-xs font-bold" />
+                                                <p:inputText id="st" value="#{checkoutBean.newAddress.street}" required="true" styleClass="w-full" />
+                                            </div>
+                                            <div class="grid">
+                                                <div class="col"><p:inputText value="#{checkoutBean.newAddress.city}" placeholder="City" styleClass="w-full" /></div>
+                                                <div class="col"><p:inputText value="#{checkoutBean.newAddress.zipcode}" placeholder="Zip" styleClass="w-full" /></div>
+                                            </div>
+                                            <p:commandButton value="Save Address" action="#{checkoutBean.saveNewAddress}" update="@form :paymentForm" styleClass="ui-button-success w-full mt-2" />
+                                        </h:panelGroup>
+                                    </h:form>
+                                </div>
+                            </div>
+                            
+                            <!-- Right Col: Order Summary & Payment -->
+                            <div class="col-12 md:col-5">
+                                <div class="p-4 border-round-xl bg-white shadow-2">
+                                    <h2 class="text-xl font-bold mb-4 border-bottom-1 border-gray-200 pb-2"><i class="bi bi-receipt mr-2 text-primary"></i> Order Summary</h2>
+                                    
+                                    <ul class="list-none p-0 m-0 mb-4">
+                                        <ui:repeat value="#{checkoutBean.parsedCartItems}" var="item">
+                                            <li class="flex justify-content-between align-items-center mb-2">
+                                                <span class="text-sm text-gray-700">#{item.title} <span class="text-gray-400">x#{item.quantity}</span></span>
+                                                <span class="font-bold text-gray-900">₹#{item.price * item.quantity}</span>
+                                            </li>
+                                        </ui:repeat>
+                                        <li class="flex justify-content-between align-items-center mt-3 pt-3 border-top-1 border-gray-200">
+                                            <span class="text-lg font-bold text-gray-900">Total</span>
+                                            <span class="text-xl font-bold text-primary-600">₹#{checkoutBean.totalAmount}</span>
+                                        </li>
+                                    </ul>
+                                    
+                                    <h:form id="paymentForm" prependId="false">
+                                        <!-- Removed styleClass to fix NetBeans red line, using ID instead -->
+                                        <h:inputHidden id="paymentCartJson" value="#{checkoutBean.cartJson}" />
+                                        
+                                        <div class="mb-4 p-3 surface-50 border-round-xl border-1 border-gray-200">
+                                            <h3 class="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">Payment Method</h3>
+                                            <p:selectOneRadio value="#{checkoutBean.paymentMethod}" layout="responsive" columns="1">
+                                                <f:selectItem itemLabel="Pay Online (Razorpay)" itemValue="online" />
+                                                <f:selectItem itemLabel="Cash on Delivery (COD)" itemValue="cod" />
+                                                <p:ajax update="@form" />
+                                            </p:selectOneRadio>
+                                        </div>
+
+                                        <h:panelGroup rendered="#{checkoutBean.paymentMethod == 'online'}" layout="block">
+                                            <p:commandButton value="Pay Online" 
+                                                             action="#{checkoutBean.initiateRazorpayOrder}" 
+                                                             onclick="syncCartData()"
+                                                             update="@form" 
+                                                             rendered="#{checkoutBean.razorpayOrderId == null}"
+                                                             disabled="#{checkoutBean.selectedAddressId == null}"
+                                                             styleClass="ui-button-primary w-full py-2 shadow-2 text-lg font-bold" />
+                                                             
+                                            <h:panelGroup rendered="#{checkoutBean.razorpayOrderId != null}">
+                                                <div class="text-center p-3 surface-100 border-round">
+                                                    <script>
+                                                        syncCartData();
+                                                        launchRazorpay('#{checkoutBean.razorpayOrderId}', '#{checkoutBean.razorpayKeyId}', #{checkoutBean.totalAmount * 100}, '#{authBean.currentUser.username}', '#{authBean.currentUser.email}');
+                                                    </script>
+                                                    <i class="pi pi-spin pi-spinner mr-2"></i> Processing...
+                                                </div>
+                                            </h:panelGroup>
+                                        </h:panelGroup>
+
+                                        <h:panelGroup rendered="#{checkoutBean.paymentMethod == 'cod'}" layout="block">
+                                            <p:commandButton value="Confirm Order (COD)" 
+                                                             action="#{checkoutBean.completeOrder('COD')}" 
+                                                             onclick="syncCartData()"
+                                                             oncomplete="if(!args.validationFailed) clearCartAndRedirect()"
+                                                             disabled="#{checkoutBean.selectedAddressId == null}"
+                                                             styleClass="ui-button-success w-full py-2 shadow-2 text-lg font-bold" />
+                                        </h:panelGroup>
+
+                                        <h:panelGroup rendered="#{checkoutBean.selectedAddressId == null}" layout="block" styleClass="text-red-500 text-xs mt-2 text-center">
+                                            <i class="bi bi-exclamation-triangle mr-1"></i> Select address to continue
+                                        </h:panelGroup>
+                                        
+                                        <!-- Hidden Completion Button -->
+                                        <h:inputHidden id="rzpPaymentId" value="dummy" />
+                                        <p:commandButton id="completeOrderBtn" action="#{checkoutBean.completeOrder('from_js')}" oncomplete="clearCartAndRedirect()" style="display:none" />
+                                    </h:form>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </h:panelGroup>
+                </h:panelGroup>
+                
+            </div>
+        </div>
+                
+            </div>
+        </div>
+                
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

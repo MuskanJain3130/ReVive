@@ -5,111 +5,772 @@
       xmlns:ui="jakarta.faces.facelets"
       xmlns:p="http://primefaces.org/ui">
     <h:head>
-        <title>ReVive - 2nd Hand Marketplace</title>
+        <title>ReVive - Sustainable Marketplace</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="ctx" content="#{request.contextPath}" />
         <h:outputStylesheet library="webjars" name="primeflex/3.3.1/primeflex.min.css" />
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet" />
         <style>
+            /* ── Reset &amp; Base ───────────────────────── */
+            *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
             :root {
-                --primary-color: #2563eb;
-                --primary-hover: #1d4ed8;
-                --bg-light: #f8fafc;
+                --primary:      #2563eb;
+                --primary-dark: #1d4ed8;
+                --accent:       #f97316;
+                --bg:           #f3f4f6;
+                --surface:      #ffffff;
+                --border:       #e5e7eb;
+                --text:         #111827;
+                --muted:        #6b7280;
+                --success:      #16a34a;
+                --radius-sm:    4px;
+                --radius:       8px;
+                --nav-h:        56px;
             }
-            body { margin: 0; background: var(--bg-light); font-family: 'Inter', -apple-system, sans-serif; color: #1e293b; }
-            .navbar { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1); padding: 1rem 2rem; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #e2e8f0; }
-            .brand { color: var(--primary-color); font-size: 1.5rem; font-weight: 800; text-decoration: none; display: flex; align-items: center; letter-spacing: -0.025em; }
-            .nav-links { display: flex; gap: 1.5rem; align-items: center; }
-            .nav-item { color: #64748b; text-decoration: none; font-weight: 600; font-size: 0.875rem; transition: all 0.2s; }
-            .nav-item:hover { color: var(--primary-color); }
-            .btn-revive { background: var(--primary-color); color: white !important; border-radius: 0.75rem; padding: 0.625rem 1.25rem; font-weight: 700; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1); border: none; }
-            .btn-revive:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2); text-decoration: none; }
-            .footer { background: #0f172a; color: white; padding: 4rem 2rem; text-align: center; }
-            .p-container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; min-height: 75vh; }
-            
-            /* Holistic UI Perfection */
-            .ui-inputfield { width: 100% !important; padding: 0.625rem 0.875rem !important; border-radius: 0.75rem !important; border: 1px solid #e2e8f0 !important; background: #ffffff !important; transition: all 0.2s !important; font-size: 0.95rem !important; color: #1e293b !important; }
-            .ui-inputfield:focus { border-color: var(--primary-color) !important; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1) !important; outline: none !important; }
-            .ui-spinner-input { padding-right: 1.5rem !important; height: 2.5rem !important; text-align: center !important; font-weight: 700 !important; font-size: 1rem !important; }
-            .ui-spinner-button { width: 1.5rem !important; padding: 0 !important; }
-            .ui-spinner-button .ui-icon { font-size: 0.75rem !important; margin-top: -0.375rem !important; }
-            .ui-button { border-radius: 0.75rem !important; padding: 0.75rem 1.5rem !important; font-weight: 700 !important; transition: all 0.2s !important; }
-            .ui-button-primary { background: var(--primary-color) !important; border: none !important; }
-            .ui-button-primary:hover { background: var(--primary-hover) !important; transform: translateY(-1px) !important; }
-            
-            .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; line-clamp: 1; }
-            .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-clamp: 2; }
-            .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-clamp: 3; }
-            
-            .card-premium { background: white; border-radius: 1.5rem; padding: 1.25rem; border: 1px solid #f1f5f9; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; height: 100%; }
-            .card-premium:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); border-color: rgba(37, 99, 235, 0.1); }
-            
-            /* Card image */
-            .card-image-wrap { height: 200px; border-radius: 1rem; overflow: hidden; background: #f1f5f9; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; flex-shrink: 0; }
-            .card-image-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
-            
-            /* DataView grid overrides */
-            .ui-dataview .ui-dataview-content .grid { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem !important; padding: 0.5rem 0; }
-            .ui-dataview .ui-dataview-content .grid > div { width: 100% !important; padding: 0 !important; }
-            
-            .ui-dataview-content-empty, .ui-datatable-empty-message { text-align: center; padding: 4rem !important; color: #94a3b8; font-weight: 500; }
+            body {
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+                background: var(--bg);
+                color: var(--text);
+                font-size: 14px;
+                line-height: 1.5;
+            }
+
+            /* ── Top Nav ──────────────────────────────── */
+            .topnav {
+                background: var(--primary);
+                height: var(--nav-h);
+                display: flex;
+                align-items: center;
+                padding: 0 24px;
+                gap: 16px;
+                position: sticky;
+                top: 0;
+                z-index: 1000;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+            }
+            .brand {
+                color: #fff;
+                font-size: 1.4rem;
+                font-weight: 800;
+                text-decoration: none;
+                white-space: nowrap;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                letter-spacing: -0.5px;
+            }
+            .brand:hover { text-decoration: none; color: #fff; }
+
+            /* Search bar */
+            .nav-search {
+                flex: 1;
+                display: flex;
+                max-width: 700px;
+                height: 38px;
+                border-radius: var(--radius-sm);
+                overflow: hidden;
+            }
+            .nav-search .ui-autocomplete {
+                flex: 1;
+                display: flex;
+                height: 100%;
+            }
+            .nav-search .ui-autocomplete input {
+                flex: 1;
+                border: none !important;
+                outline: none !important;
+                padding: 0 14px !important;
+                font-size: 14px !important;
+                height: 100% !important;
+                width: 100% !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+            }
+            .nav-search button {
+                background: var(--accent);
+                border: none;
+                padding: 0 16px;
+                cursor: pointer;
+                color: white;
+                font-size: 16px;
+                transition: background 0.15s;
+            }
+            .nav-search button:hover { background: #ea6c00; }
+
+            /* Nav links */
+            .nav-links {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                margin-left: auto;
+            }
+            .nav-item {
+                color: rgba(255,255,255,0.92);
+                text-decoration: none;
+                font-weight: 600;
+                font-size: 13px;
+                padding: 6px 12px;
+                border-radius: var(--radius-sm);
+                transition: background 0.15s;
+                white-space: nowrap;
+            }
+            .nav-item:hover { background: rgba(255,255,255,0.15); color: #fff; text-decoration: none; }
+            .nav-item.active { background: rgba(255,255,255,0.2); color: #fff; }
+            .nav-item-danger { color: #fca5a5 !important; }
+            .nav-item-danger:hover { background: rgba(239,68,68,0.2) !important; }
+            .btn-login {
+                background: var(--accent);
+                color: white !important;
+                border-radius: var(--radius-sm);
+                padding: 6px 16px;
+                font-weight: 700;
+                font-size: 13px;
+                text-decoration: none;
+                transition: background 0.15s;
+            }
+            .btn-login:hover { background: #ea6c00; text-decoration: none; color: white; }
+
+            /* Sub-nav bar */
+            .subnav {
+                background: #1e3a8a;
+                padding: 0 24px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                height: 36px;
+                overflow-x: auto;
+            }
+            .subnav-item {
+                color: rgba(255,255,255,0.85);
+                text-decoration: none;
+                font-size: 12.5px;
+                font-weight: 500;
+                padding: 4px 10px;
+                border-radius: var(--radius-sm);
+                white-space: nowrap;
+                transition: background 0.15s;
+            }
+            .subnav-item:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+            /* ── Layout ───────────────────────────────── */
+            .page-content { max-width: 1440px; margin: 0 auto; padding: 20px 24px; min-height: 80vh; }
+
+            /* ── Section heading ───────────────────────── */
+            .section-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 16px;
+                padding-bottom: 10px;
+                border-bottom: 2px solid var(--border);
+            }
+            .section-title {
+                font-size: 18px;
+                font-weight: 700;
+                color: var(--text);
+            }
+
+            /* ── Product Grid ────────────────────────── */
+            .product-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                gap: 1px;
+                background: var(--border);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                overflow: hidden;
+            }
+
+            /* ── Product Tile ────────────────────────── */
+            .product-tile {
+                background: var(--surface);
+                display: flex;
+                flex-direction: column;
+                cursor: pointer;
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+                position: relative;
+                height: 100%;
+                width: 100%;
+                min-width: 0;
+                border-radius: 12px;
+                border: 1px solid var(--border);
+                overflow: hidden;
+            }
+            .product-tile:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+                border-color: transparent;
+                z-index: 1;
+            }
+
+            /* Image area */
+            .tile-img {
+                width: 100%;
+                aspect-ratio: 1 / 1;
+                background: #f9fafb;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+                border-bottom: 1px solid var(--border);
+            }
+            .tile-img img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                padding: 12px;
+                transition: transform 0.25s;
+            }
+            .product-tile:hover .tile-img img { transform: scale(1.04); }
+            .tile-img-placeholder { font-size: 3rem; color: #d1d5db; }
+
+            /* Condition badge */
+            .tile-badge {
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                background: var(--accent);
+                color: white;
+                font-size: 10px;
+                font-weight: 700;
+                padding: 2px 8px;
+                border-radius: 20px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                z-index: 10;
+            }
+            .tile-badge.good { background: #16a34a; }
+            .tile-badge.like-new { background: #0891b2; }
+            .tile-badge.new { background: #7c3aed; }
+            .tile-badge.fair { background: #d97706; }
+            .tile-badge.poor { background: #dc2626; }
+
+            /* Tile body */
+            .tile-body { padding: 12px; flex: 1; display: flex; flex-direction: column; }
+            .tile-title {
+                font-size: 13.5px;
+                font-weight: 500;
+                color: var(--text);
+                line-height: 1.4;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                margin-bottom: 4px;
+            }
+            .tile-desc {
+                font-size: 12px;
+                color: var(--muted);
+                display: -webkit-box;
+                -webkit-line-clamp: 1;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                margin-bottom: 8px;
+            }
+            .tile-price {
+                font-size: 18px;
+                font-weight: 800;
+                color: #b91c1c;
+                margin-bottom: 2px;
+            }
+            .tile-seller {
+                font-size: 11px;
+                color: var(--muted);
+                margin-bottom: 10px;
+            }
+            .tile-seller span { color: var(--primary); font-weight: 600; }
+
+            /* Tile actions */
+            .tile-actions { margin-top: auto; }
+            .qty-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 8px;
+            }
+            .qty-label { font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+            .qty-select {
+                border: 1px solid var(--border);
+                border-radius: var(--radius-sm);
+                padding: 4px 8px;
+                font-size: 13px;
+                font-family: inherit;
+                color: var(--text);
+                background: #f9fafb;
+                cursor: pointer;
+                outline: none;
+                transition: border-color 0.15s;
+            }
+            .qty-select:focus { border-color: var(--primary); }
+            .btn-add {
+                width: 100%;
+                background: var(--primary);
+                color: white;
+                border: none;
+                border-radius: var(--radius-sm);
+                padding: 9px 0;
+                font-size: 13px;
+                font-weight: 700;
+                cursor: pointer;
+                transition: background 0.15s;
+                font-family: inherit;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+            }
+            .btn-add:hover { background: var(--primary-dark); }
+
+            /* ── PrimeFaces DataView override ─────────── */
+            .ui-dataview { background: transparent !important; border: none !important; }
+            .ui-dataview-header { display: none !important; }
+            .ui-dataview .ui-dataview-content { background: transparent !important; border: none !important; padding: 0 !important; }
+            .my-product-grid .ui-dataview-content .ui-g,
+            .my-product-grid .ui-dataview-content .grid,
+            .my-product-grid .ui-dataview-content .ui-dataview-row {
+                display: grid !important;
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
+                gap: 24px !important;
+                background: transparent !important;
+                border: none !important;
+                margin: 0 !important;
+                padding: 12px 4px !important;
+            }
+            .my-product-grid .ui-dataview-content .ui-g::before,
+            .my-product-grid .ui-dataview-content .ui-g::after,
+            .my-product-grid .ui-dataview-content .grid::before,
+            .my-product-grid .ui-dataview-content .grid::after {
+                display: none !important;
+            }
+            .my-product-grid .ui-dataview-content .ui-g > div,
+            .my-product-grid .ui-dataview-content .grid > div,
+            .my-product-grid .ui-dataview-content .ui-dataview-row > div {
+                display: flex !important;
+                width: 100% !important;
+                max-width: none !important;
+                flex: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                min-width: 0 !important;
+                background: transparent !important;
+            }
+            .ui-dataview-footer { background: transparent !important; border: none !important; }
+
+            /* Paginator */
+            .ui-paginator { background: transparent !important; border: none !important; padding: 16px 0 4px !important; }
+            .ui-paginator .ui-paginator-page.ui-state-active { background: var(--primary) !important; border-color: var(--primary) !important; color: white !important; border-radius: var(--radius-sm) !important; }
+            .ui-paginator .ui-paginator-page, .ui-paginator .ui-paginator-first,
+            .ui-paginator .ui-paginator-prev, .ui-paginator .ui-paginator-next,
+            .ui-paginator .ui-paginator-last {
+                border-radius: var(--radius-sm) !important;
+                min-width: 32px !important;
+                height: 32px !important;
+                line-height: 32px !important;
+                font-size: 13px !important;
+                margin: 0 2px !important;
+            }
+
+            /* ── Form inputs (for seller/login/register) */
+            .ui-inputfield {
+                width: 100% !important;
+                padding: 9px 12px !important;
+                border-radius: var(--radius) !important;
+                border: 1px solid var(--border) !important;
+                background: #fff !important;
+                font-size: 14px !important;
+                font-family: inherit !important;
+                color: var(--text) !important;
+                transition: border-color 0.15s !important;
+            }
+            .ui-inputfield:focus { border-color: var(--primary) !important; box-shadow: 0 0 0 3px rgba(37,99,235,0.1) !important; outline: none !important; }
+            .ui-password, .ui-input-icon-right { display: block !important; width: 100% !important; }
+            .ui-button {
+                border-radius: var(--radius) !important;
+                padding: 9px 20px !important;
+                font-weight: 700 !important;
+                font-family: inherit !important;
+                font-size: 14px !important;
+                transition: all 0.15s !important;
+            }
+            .ui-button-primary { background: var(--primary) !important; border-color: var(--primary) !important; }
+            .ui-button-primary:hover { background: var(--primary-dark) !important; border-color: var(--primary-dark) !important; }
+
+            /* ── Card (seller form / login) ─────────── */
+            .card-premium {
+                background: var(--surface);
+                border-radius: var(--radius);
+                padding: 28px;
+                border: 1px solid var(--border);
+                box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+            }
+
+            /* ── Footer ──────────────────────────────── */
+            .footer {
+                background: #111827;
+                color: white;
+                padding: 40px 24px;
+                text-align: center;
+                margin-top: 40px;
+            }
+            .footer h2 { font-size: 20px; font-weight: 800; margin-bottom: 8px; color: #fff; }
+            .footer p { color: #9ca3af; font-size: 13px; max-width: 480px; margin: 0 auto 12px; }
+            .footer .copy { font-size: 12px; color: #6b7280; }
+
+            /* ── Product Tile Carousel ────────────────── */
+            .tile-carousel {
+                position: relative;
+                width: 100%;
+                aspect-ratio: 1 / 1;
+                background: #f9fafb;
+                border-bottom: 1px solid var(--border);
+                overflow: hidden;
+                user-select: none;
+            }
+            /* Main slide area */
+            .tc-slides {
+                display: flex;
+                transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+                will-change: transform;
+                width: 100%;
+                height: 100%;
+            }
+            .tc-slide {
+                flex: 0 0 100%;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #f9fafb;
+                min-width: 0;
+            }
+            .tc-slide img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                padding: 10px;
+                display: block;
+            }
+            .tc-placeholder {
+                font-size: 3rem;
+                color: #d1d5db;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                aspect-ratio: 1 / 1;
+                width: 100%;
+            }
+            /* Arrow buttons */
+            .tc-arrow {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                background: rgba(255,255,255,0.92);
+                border: 1px solid #e5e7eb;
+                border-radius: 50%;
+                width: 28px;
+                height: 28px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                z-index: 2;
+                font-size: 13px;
+                color: #374151;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+                transition: background 0.15s;
+                line-height: 1;
+            }
+            .tc-arrow:hover { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.18); }
+            .tc-arrow.prev { left: 6px; }
+            .tc-arrow.next { right: 6px; }
+            .tc-arrow.hidden { display: none; }
+            /* Thumbnail strip */
+            .tc-thumbs {
+                display: flex;
+                gap: 4px;
+                padding: 6px 8px;
+                overflow-x: auto;
+                background: #fff;
+                border-bottom: 1px solid #f3f4f6;
+                scrollbar-width: none;
+            }
+            .tc-thumbs::-webkit-scrollbar { display: none; }
+            .tc-thumb {
+                flex: 0 0 40px;
+                height: 40px;
+                border-radius: 4px;
+                overflow: hidden;
+                border: 2px solid transparent;
+                cursor: pointer;
+                transition: border-color 0.15s;
+                background: #f3f4f6;
+            }
+            .tc-thumb img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+            }
+            .tc-thumb.active { border-color: var(--primary); }
+            /* Image counter badge */
+            .tc-counter {
+                position: absolute;
+                bottom: 8px;
+                right: 8px;
+                background: rgba(0,0,0,0.5);
+                color: white;
+                font-size: 10px;
+                font-weight: 700;
+                padding: 2px 7px;
+                border-radius: 20px;
+                z-index: 2;
+                pointer-events: none;
+            }
+            .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+            .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+            .ui-dataview-content-empty, .ui-datatable-empty-message { text-align: center; padding: 4rem !important; color: #9ca3af; font-weight: 500; }
+
+            /* DataTable (My Listings) */
+            .ui-datatable { border-radius: var(--radius) !important; overflow: hidden !important; border: 1px solid var(--border) !important; }
+            .ui-datatable thead th { background: #f9fafb !important; font-weight: 700 !important; font-size: 12px !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; color: var(--muted) !important; border-bottom: 1px solid var(--border) !important; padding: 12px 16px !important; }
+            .ui-datatable tbody td { padding: 12px 16px !important; font-size: 14px !important; border-bottom: 1px solid #f3f4f6 !important; }
+            .ui-datatable tbody tr:last-child td { border-bottom: none !important; }
+            .ui-datatable tbody tr:hover td { background: #f9fafb !important; }
         </style>
         <p:growl id="growl" showDetail="true" life="3000" />
         <script>
-            function findQtyAndAdd(btnId, title, price) {
-                // PrimeFaces IDs can be complex, find the sibling spinner input
-                let parts = btnId.split(':');
-                parts.pop(); // Remove button ID
-                let baseId = parts.join(':');
-                let qtyInput = document.getElementById(baseId + ':qty_input') || document.getElementById(baseId + ':qty');
-                let qty = qtyInput ? qtyInput.value : 1;
-                addToGuestCart(title, price, qty);
+            //<![CDATA[
+            function getQtyValue(inputEl) {
+                if (!inputEl) return 1;
+                var n = parseInt(inputEl.value);
+                return (n > 0 && n < 100) ? n : 1;
             }
 
-            function addToGuestCart(title, price, quantity) {
-                let cart = JSON.parse(localStorage.getItem('revive_cart') || '[]');
-                let qty = parseInt(quantity) || 1;
-                cart.push({ title, price, quantity: qty, id: Date.now() });
+            function addToGuestCart(productId, title, price, quantity) {
+                var cart = JSON.parse(localStorage.getItem('revive_cart') || '[]');
+                var qty = parseInt(quantity) || 1;
+                var pid = parseInt(productId);
+                
+                // Check if product already in cart
+                var existing = null;
+                for(var i=0; i<cart.length; i++) {
+                    if(cart[i].productid == pid || cart[i].id == pid) {
+                        existing = cart[i];
+                        break;
+                    }
+                }
+
+                if (existing) {
+                    existing.quantity += qty;
+                } else {
+                    cart.push({ 
+                        productid: pid, 
+                        id: pid,
+                        title: title, 
+                        price: price, 
+                        quantity: qty 
+                    });
+                }
                 localStorage.setItem('revive_cart', JSON.stringify(cart));
-                alert(qty + " x " + title + " added to local cart!");
+                showToast(qty + ' × ' + title + ' added to cart!');
             }
+
+            function showToast(msg) {
+                var t = document.createElement('div');
+                t.textContent = msg;
+                t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.3);opacity:0;transition:opacity 0.2s;';
+                document.body.appendChild(t);
+                setTimeout(function(){ t.style.opacity='1'; }, 10);
+                setTimeout(function(){ t.style.opacity='0'; setTimeout(function(){ t.remove(); }, 200); }, 2800);
+            }
+
+            /* ── Product image carousel builder ──── */
+            function buildCarousel(el, base) {
+                // Clear any previous build
+                el.innerHTML = '';
+                // Remove any sibling thumbs strip from previous build
+                var next = el.nextSibling;
+                while (next && next.classList && next.classList.contains('tc-thumbs')) {
+                    var toRemove = next;
+                    next = next.nextSibling;
+                    toRemove.remove();
+                }
+
+                var raw = el.getAttribute('data-images') || '';
+                var title = el.getAttribute('data-title') || '';
+                var imgs = raw && raw !== 'placeholder.png'
+                    ? raw.split(';').filter(function(s){ return s.trim(); })
+                    : [];
+
+                console.log('[ReVive Carousel] data-images="' + raw + '" imgs=' + imgs.length);
+
+                if (imgs.length === 0) {
+                    el.innerHTML = '<div class="tc-placeholder"><i class="bi bi-box-seam"></i></div>';
+                    return;
+                }
+
+                var current = 0;
+                var slidesDiv = document.createElement('div');
+                slidesDiv.className = 'tc-slides';
+
+                imgs.forEach(function(imgName, i) {
+                    var slide = document.createElement('div');
+                    slide.className = 'tc-slide';
+                    var img = document.createElement('img');
+                    img.src = base + '/images/' + imgName.trim();
+                    img.alt = title + ' image ' + (i + 1);
+                    img.loading = 'lazy';
+                    console.log('[ReVive Carousel] slide img src=' + img.src);
+                    slide.appendChild(img);
+                    slidesDiv.appendChild(slide);
+                });
+                el.appendChild(slidesDiv);
+
+                var prevBtn = null, nextBtn = null, counter = null;
+
+                function goTo(idx) {
+                    current = Math.max(0, Math.min(idx, imgs.length - 1));
+                    slidesDiv.style.transform = 'translateX(-' + (current * 100) + '%)';
+                    if (counter) counter.textContent = (current + 1) + ' / ' + imgs.length;
+                    el.querySelectorAll('.tc-thumb').forEach(function(th, ti) {
+                        th.classList.toggle('active', ti === current);
+                    });
+                    if (prevBtn) prevBtn.classList.toggle('hidden', current === 0);
+                    if (nextBtn) nextBtn.classList.toggle('hidden', current === imgs.length - 1);
+                }
+
+                if (imgs.length > 1) {
+                    prevBtn = document.createElement('button');
+                    prevBtn.type = 'button'; // Prevent form submission
+                    prevBtn.className = 'tc-arrow prev hidden';
+                    prevBtn.innerHTML = '&#8249;';
+                    prevBtn.onclick = function(e) { e.preventDefault(); e.stopPropagation(); goTo(current - 1); };
+                    el.appendChild(prevBtn);
+
+                    nextBtn = document.createElement('button');
+                    nextBtn.type = 'button'; // Prevent form submission
+                    nextBtn.className = 'tc-arrow next';
+                    nextBtn.innerHTML = '&#8250;';
+                    nextBtn.onclick = function(e) { e.preventDefault(); e.stopPropagation(); goTo(current + 1); };
+                    el.appendChild(nextBtn);
+
+                    counter = document.createElement('div');
+                    counter.className = 'tc-counter';
+                    counter.textContent = '1 / ' + imgs.length;
+                    el.appendChild(counter);
+
+                    var thumbsDiv = document.createElement('div');
+                    thumbsDiv.className = 'tc-thumbs';
+                    imgs.forEach(function(imgName, i) {
+                        var th = document.createElement('div');
+                        th.className = 'tc-thumb' + (i === 0 ? ' active' : '');
+                        var timg = document.createElement('img');
+                        timg.src = base + '/images/' + imgName.trim();
+                        timg.alt = 'thumb ' + (i + 1);
+                        timg.loading = 'lazy';
+                        th.appendChild(timg);
+                        th.onclick = function(e) { if(e) e.preventDefault(); goTo(i); };
+                        thumbsDiv.appendChild(th);
+                    });
+                    el.after(thumbsDiv);
+                }
+
+                // Touch swipe
+                var startX = 0;
+                slidesDiv.addEventListener('touchstart', function(e){ startX = e.touches[0].clientX; }, {passive:true});
+                slidesDiv.addEventListener('touchend', function(e){
+                    var dx = e.changedTouches[0].clientX - startX;
+                    if (dx > 40) goTo(current - 1);
+                    else if (dx < -40) goTo(current + 1);
+                }, {passive:true});
+            }
+
+            function initCarousels() {
+                var ctx = document.querySelector('meta[name="ctx"]');
+                var base = ctx ? ctx.content : '';
+                document.querySelectorAll('.tile-carousel').forEach(function(el) {
+                    // Skip page-level carousels that are already built
+                    if (el.querySelector('.tc-slides')) return;
+                    buildCarousel(el, base);
+                });
+            }
+
+            // Force-rebuild all carousels (called from dialog oncomplete)
+            function rebuildCarousels(selector) {
+                var ctx = document.querySelector('meta[name="ctx"]');
+                var base = ctx ? ctx.content : '';
+                var sel = selector || '.tile-carousel';
+                var targets = document.querySelectorAll(sel);
+                console.log('[ReVive] rebuildCarousels: found ' + targets.length + ' elements, base=' + base);
+                targets.forEach(function(el, i) {
+                    console.log('[ReVive] carousel[' + i + '] data-images="' + el.getAttribute('data-images') + '"');
+                    buildCarousel(el, base);
+                });
+            }
+
+
+            // Run after page load and PrimeFaces AJAX updates
+            document.addEventListener('DOMContentLoaded', initCarousels);
+            if (typeof jsf !== 'undefined') {
+                jsf.ajax.addOnEvent(function(data) {
+                    if (data.status === 'success') initCarousels();
+                });
+            }
+
+            //]]>
         </script>
     </h:head>
     <h:body>
-        <h:form id="navForm">
-            <div class="navbar flex justify-content-between align-items-center">
-                <a href="index.xhtml" class="brand"><i class="bi bi-recycle mr-2"></i>ReVive</a>
-                
+        <!-- Top Navigation -->
+        <div class="topnav">
+            <a href="index.xhtml" class="brand"><i class="bi bi-recycle"></i> ReVive</a>
+
+            <div class="nav-search">
+                <form action="search.xhtml" method="GET" style="display:flex; width:100%; height:100%; margin:0;">
+                    <input type="text" name="q" placeholder="Search for products..." value="#{param.q}" style="flex:1; border:none; padding:0 14px; font-size:14px; outline:none;" />
+                    <button type="submit" style="background:var(--accent); border:none; padding:0 16px; color:white; cursor:pointer; font-size:16px;">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </form>
+            </div>
+
+            <h:form id="navForm" style="margin: 0; padding: 0; display: flex;">
                 <div class="nav-links">
-                    <h:link outcome="index" value="Marketplace" styleClass="nav-item" />
-                    
+                    <h:link outcome="index" value="Shop" styleClass="nav-item" />
+
                     <h:panelGroup rendered="#{authBean.loggedIn}">
                         <h:link outcome="seller" value="Sell" styleClass="nav-item" rendered="#{not authBean.admin}" />
-                        <h:link outcome="admin" value="Admin Panel" styleClass="nav-item text-red-600 font-bold" rendered="#{authBean.admin}" />
-                        
-                        <h:link outcome="cart" styleClass="nav-item mr-2" rendered="#{not authBean.admin}">
-                            <i class="bi bi-cart3 mr-1"></i>Cart
+                        <h:link outcome="admin" value="Admin" styleClass="nav-item" rendered="#{authBean.admin}" />
+                        <h:link outcome="cart" styleClass="nav-item" rendered="#{not authBean.admin}">
+                            <i class="bi bi-cart3"></i> Cart
                         </h:link>
-                        <span class="text-xs text-gray-500">Welcome, #{authBean.currentUser.username}</span>
-                        <p:commandLink action="#{authBean.logout}" value="Logout" styleClass="nav-item text-red-600 ml-2" />
+                        <h:link outcome="profile" styleClass="nav-item">
+                            <i class="bi bi-person-circle mr-1"></i> My Profile
+                        </h:link>
+                        <p:commandLink action="#{authBean.logout}" value="Sign Out" styleClass="nav-item nav-item-danger" />
                     </h:panelGroup>
 
                     <h:panelGroup rendered="#{!authBean.loggedIn}">
-                        <h:link outcome="cart" styleClass="nav-item mr-3">
-                            <i class="bi bi-cart3 mr-1"></i>Cart
+                        <h:link outcome="cart" styleClass="nav-item">
+                            <i class="bi bi-cart3"></i> Cart
                         </h:link>
-                        <h:link outcome="login" value="Login" styleClass="btn-revive" />
+                        <h:link outcome="login" value="Sign In" styleClass="btn-login" />
                     </h:panelGroup>
                 </div>
-            </div>
-        </h:form>
+            </h:form>
+        </div>
 
-        <div class="p-container py-4">
+        <div class="page-content">
             <ui:insert name="content">Default Content</ui:insert>
         </div>
 
         <div class="footer">
-            <h2 class="text-2xl font-bold mb-3">ReVive</h2>
-            <p class="text-gray-400 max-w-lg mx-auto">Connecting passionate buyers with secondhand treasures. Giving products a second life, one click at a time.</p>
-            <div class="mt-4 text-sm text-gray-500">© 2026 ReVive Marketplace. All rights reserved.</div>
+            <h2><i class="bi bi-recycle"></i> ReVive</h2>
+            <p>Connecting buyers with quality secondhand goods. Giving products a second life, one click at a time.</p>
+            <div class="copy">© 2026 ReVive Marketplace. All rights reserved.</div>
         </div>
     </h:body>
 </html>

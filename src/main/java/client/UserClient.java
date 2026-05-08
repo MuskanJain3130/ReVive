@@ -70,4 +70,16 @@ public class UserClient {
     public void close() {
         client.close();
     }
+
+    public <T> T getProductById(Class<T> responseType, String id) throws ClientErrorException {
+        return webTarget.path(MessageFormat.format("product/{0}", new Object[]{id})).request(MediaType.APPLICATION_JSON).get(responseType);
+    }
+
+    public <T> T getReviewsForProduct(jakarta.ws.rs.core.GenericType<T> responseType, String id) throws ClientErrorException {
+        return webTarget.path(MessageFormat.format("product/{0}/reviews", new Object[]{id})).request(MediaType.APPLICATION_JSON).get(responseType);
+    }
+
+    public <T> T getOrderDetailsForUserProduct(Class<T> responseType, String userId, String productId) throws ClientErrorException {
+        return webTarget.path(MessageFormat.format("orderDetails/{0}/{1}", new Object[]{userId, productId})).request(MediaType.APPLICATION_JSON).get(responseType);
+    }
 }

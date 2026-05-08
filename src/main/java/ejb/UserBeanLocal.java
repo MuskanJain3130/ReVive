@@ -34,4 +34,16 @@ public interface UserBeanLocal {
     List<Products> getAllApprovedProducts();
 
     void registerUser(Users u, int roleId);
+
+    Products getProductById(int id);
+    List<Reviews> getReviewsForProduct(int productId);
+    OrderDetails getOrderDetailsForUserProduct(int userId, int productId);
+
+    List<Addresses> getAddressesForUser(int userId);
+    void addAddress(Addresses address, int userId);
+    void processCheckout(Orders order, List<OrderDetails> details, Payments payment);
+
+    List<Orders> getOrdersForBuyer(int buyerId);
+    List<OrderDetails> getSalesForSeller(int sellerId);
+    void updateUserInfo(Users user);
 }

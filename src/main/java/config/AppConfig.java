@@ -6,6 +6,7 @@ import jakarta.security.enterprise.authentication.mechanism.http.CustomFormAuthe
 import jakarta.security.enterprise.authentication.mechanism.http.LoginToContinue;
 import jakarta.security.enterprise.identitystore.DatabaseIdentityStoreDefinition;
 import jakarta.security.enterprise.identitystore.Pbkdf2PasswordHash;
+import jakarta.annotation.security.DeclareRoles;
 
 @FacesConfig
 @ApplicationScoped
@@ -22,5 +23,6 @@ import jakarta.security.enterprise.identitystore.Pbkdf2PasswordHash;
     groupsQuery = "select r.rolename from role_master r join users u on r.roleid = u.roleid where u.username = ?",
     hashAlgorithm = Pbkdf2PasswordHash.class
 )
+@DeclareRoles({"Admin", "User", "admin", "user", "1", "2"})
 public class AppConfig {
 }

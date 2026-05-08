@@ -20,7 +20,7 @@ import jakarta.persistence.*;
 @Stateless
 public class AdminBean implements AdminBeanLocal {
     
-    @PersistenceContext
+    @PersistenceContext(unitName="JPU")
     EntityManager em;
 
     // approve product

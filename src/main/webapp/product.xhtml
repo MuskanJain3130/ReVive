@@ -1,0 +1,343 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="template.xhtml">
+
+    <f:metadata>
+        <f:viewParam name="id" value="#{productDetailBean.productId}" />
+        <f:viewAction action="#{productDetailBean.loadProduct}" />
+    </f:metadata>
+
+    <ui:define name="title">#{productDetailBean.product.title} - ReVive</ui:define>
+
+    <ui:define name="content">
+        <style>
+            .pd-container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 24px;
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            }
+            .pd-top {
+                display: grid;
+                grid-template-columns: 1fr 1fr 300px;
+                gap: 32px;
+                margin-bottom: 40px;
+            }
+            @media (max-width: 992px) {
+                .pd-top {
+                    grid-template-columns: 1fr 1fr;
+                }
+            }
+            @media (max-width: 768px) {
+                .pd-top {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .pd-gallery {
+                border-radius: 8px;
+                overflow: hidden;
+                border: 1px solid var(--border);
+                background: #f9fafb;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 400px;
+            }
+            .pd-info h1 {
+                font-size: 24px;
+                font-weight: 700;
+                color: var(--text);
+                margin-top: 0;
+                margin-bottom: 8px;
+                line-height: 1.3;
+            }
+            .pd-rating {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 14px;
+                color: #d97706; /* Star color */
+                margin-bottom: 16px;
+                border-bottom: 1px solid var(--border);
+                padding-bottom: 16px;
+            }
+            .pd-rating span.count {
+                color: var(--primary);
+                font-weight: 500;
+            }
+            .pd-price {
+                font-size: 32px;
+                font-weight: 800;
+                color: #b91c1c;
+                margin-bottom: 24px;
+            }
+            .pd-meta {
+                list-style: none;
+                padding: 0;
+                margin: 0 0 24px 0;
+                font-size: 14px;
+                color: var(--text);
+            }
+            .pd-meta li {
+                margin-bottom: 8px;
+                display: flex;
+            }
+            .pd-meta li strong {
+                width: 120px;
+                color: var(--muted);
+            }
+            .pd-actions-box {
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                padding: 24px;
+                background: #f9fafb;
+            }
+            .pd-actions-box .price-lg {
+                font-size: 24px;
+                font-weight: 700;
+                color: #b91c1c;
+                margin-bottom: 16px;
+            }
+            .pd-status {
+                color: #16a34a;
+                font-weight: 600;
+                font-size: 18px;
+                margin-bottom: 16px;
+            }
+            .pd-qty {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 24px;
+            }
+            .pd-qty select {
+                padding: 8px;
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                font-size: 14px;
+                width: 80px;
+            }
+            .pd-btn {
+                display: block;
+                width: 100%;
+                background: #f59e0b; /* Amazon yellow/orange */
+                color: #111827;
+                text-align: center;
+                padding: 12px;
+                border-radius: 100px;
+                font-weight: 600;
+                font-size: 15px;
+                border: none;
+                cursor: pointer;
+                transition: background 0.2s;
+                text-decoration: none;
+                margin-bottom: 12px;
+            }
+            .pd-btn:hover {
+                background: #d97706;
+            }
+            .pd-btn.buy-now {
+                background: #f97316;
+            }
+            .pd-btn.buy-now:hover {
+                background: #ea580c;
+            }
+            
+            /* Reviews */
+            .review-item {
+                border-bottom: 1px solid var(--border);
+                padding: 16px 0;
+            }
+            .review-header {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 8px;
+            }
+            .review-user {
+                font-weight: 600;
+                color: var(--text);
+            }
+            .review-date {
+                font-size: 12px;
+                color: var(--muted);
+            }
+            .review-stars {
+                color: #d97706;
+                font-size: 14px;
+            }
+            .review-body {
+                font-size: 14px;
+                color: var(--text);
+                line-height: 1.5;
+            }
+            .write-review-box {
+                background: #f9fafb;
+                padding: 24px;
+                border-radius: 8px;
+                border: 1px solid var(--border);
+                margin-top: 24px;
+            }
+            /* Galleria styling */
+            body .ui-galleria .ui-galleria-thumbnail-wrapper {
+                background: transparent !important;
+            }
+            body .ui-galleria .ui-galleria-thumbnail-container {
+                background: transparent !important;
+            }
+        </style>
+
+        <ui:fragment rendered="#{productDetailBean.product == null}">
+            <div style="text-align:center; padding: 100px;">
+                <h2>Product not found.</h2>
+                <h:link outcome="index" value="Return to Home" style="color:var(--primary);"/>
+            </div>
+        </ui:fragment>
+
+        <h:form id="productForm" rendered="#{productDetailBean.product != null}">
+            <div class="pd-container">
+                <div class="pd-top">
+                    <!-- Left: Gallery -->
+                    <div class="pd-gallery">
+                        <p:galleria value="#{productDetailBean.images}" var="img" numVisible="4" circular="true" autoPlay="false" showItemNavigators="true" showThumbnailNavigators="true" style="max-width: 100%;">
+                            <p:graphicImage value="/images/#{img}" alt="#{productDetailBean.product.title}" style="width: 100%; display: block;" />
+                            <f:facet name="thumbnail">
+                                <p:graphicImage value="/images/#{img}" alt="#{productDetailBean.product.title}" style="width: 60px; height: 60px; object-fit: cover;" />
+                            </f:facet>
+                        </p:galleria>
+                    </div>
+
+                    <!-- Middle: Info -->
+                    <div class="pd-info">
+                        <h1>#{productDetailBean.product.title}</h1>
+                        
+                        <div class="pd-rating">
+                            <ui:fragment rendered="#{productDetailBean.reviewCount > 0}">
+                                <span>
+                                    #{productDetailBean.averageRating} <i class="bi bi-star-fill"></i>
+                                </span>
+                                <span class="count">#{productDetailBean.reviewCount} ratings</span>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{productDetailBean.reviewCount == 0}">
+                                <span>No reviews yet</span>
+                            </ui:fragment>
+                        </div>
+                        
+                        <div class="pd-price">₹#{productDetailBean.product.price}</div>
+                        
+                        <ul class="pd-meta">
+                            <li><strong>Condition:</strong> <span>#{productDetailBean.product.productCondition}</span></li>
+                            <li><strong>Sold By:</strong> <span>#{productDetailBean.product.sellerid.username}</span></li>
+                            <li><strong>Available Qty:</strong> <span>#{productDetailBean.product.quantity}</span></li>
+                        </ul>
+                    </div>
+
+                    <!-- Right: Add to Cart Box -->
+                    <div class="pd-actions-box">
+                        <div class="price-lg">₹#{productDetailBean.product.price}</div>
+                        <div class="pd-status">
+                            <ui:fragment rendered="#{productDetailBean.product.quantity > 0}">In Stock.</ui:fragment>
+                            <ui:fragment rendered="#{productDetailBean.product.quantity le 0}"><span style="color:#dc2626;">Out of Stock</span></ui:fragment>
+                        </div>
+                        
+                        <div class="pd-qty">
+                            <label>Quantity:</label>
+                            <input type="number" id="detail_qty" value="1" min="1" max="#{productDetailBean.product.quantity}" style="width:70px; padding:6px; border:1px solid var(--border); border-radius:4px;" />
+                        </div>
+                        
+                        <ui:fragment rendered="#{authBean.loggedIn}">
+                            <button type="button" class="pd-btn" onclick="addToGuestCart(#{productDetailBean.product.productid}, '#{productDetailBean.product.title}', #{productDetailBean.product.price}, parseInt(document.getElementById('detail_qty').value))">
+                                Add to Cart
+                            </button>
+                            <!-- You can add a buy now action if you want, pointing to checkout -->
+                            <!-- <button type="button" class="pd-btn buy-now">Buy Now</button> -->
+                        </ui:fragment>
+                        
+                        <ui:fragment rendered="#{not authBean.loggedIn}">
+                            <button type="button" class="pd-btn" onclick="addToGuestCart(#{productDetailBean.product.productid}, '#{productDetailBean.product.title}', #{productDetailBean.product.price}, parseInt(document.getElementById('detail_qty').value))">
+                                Add to Cart
+                            </button>
+                        </ui:fragment>
+
+                        <div style="margin-top:16px; font-size:12px; color:var(--muted); text-align:center;">
+                            Secure transaction handled by ReVive
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom: Tabs -->
+                <p:tabView>
+                    <p:tab title="Description">
+                        <div style="padding: 16px 0; font-size:15px; line-height:1.6; color:var(--text);">
+                            #{productDetailBean.product.description}
+                        </div>
+                    </p:tab>
+                    
+                    <p:tab title="Customer Reviews">
+                        <div style="padding: 16px 0;">
+                            
+                            <ui:fragment rendered="#{productDetailBean.reviewCount == 0}">
+                                <p style="color:var(--muted);">No reviews yet for this product.</p>
+                            </ui:fragment>
+
+                            <ui:repeat value="#{productDetailBean.reviews}" var="review">
+                                <div class="review-item">
+                                    <div class="review-header">
+                                        <div class="review-user"><i class="bi bi-person-circle"></i> @#{review.reviewerid.username}</div>
+                                        <div class="review-stars">
+                                            #{review.rating} <i class="bi bi-star-fill"></i>
+                                        </div>
+                                    </div>
+                                    <div class="review-date">
+                                        <h:outputText value="#{review.createdAt}">
+                                            <f:convertDateTime pattern="dd MMM yyyy" />
+                                        </h:outputText>
+                                    </div>
+                                    <div class="review-body">
+                                        #{review.comment}
+                                    </div>
+                                </div>
+                            </ui:repeat>
+
+                            <!-- Write a review box (only if user bought it) -->
+                            <ui:fragment rendered="#{productDetailBean.canReview}">
+                                <div class="write-review-box">
+                                    <h3 style="margin-top:0; margin-bottom:16px;">Write a Review</h3>
+                                    <p:messages id="reviewMsg" showDetail="true" closable="true" />
+                                    
+                                    <div style="margin-bottom:12px;">
+                                        <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Rating (1-5)</label>
+                                        <p:spinner value="#{productDetailBean.newReview.rating}" min="1" max="5" required="true" />
+                                    </div>
+                                    <div style="margin-bottom:16px;">
+                                        <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Comment</label>
+                                        <p:inputTextarea value="#{productDetailBean.newReview.comment}" rows="4" style="width:100%;" required="true" />
+                                    </div>
+                                    <p:commandButton value="Submit Review" action="#{productDetailBean.submitReview}" update="productForm" styleClass="ui-button-primary" />
+                                </div>
+                            </ui:fragment>
+                            
+                            <!-- Prompt for non-buyers or logged out -->
+                            <ui:fragment rendered="#{not productDetailBean.canReview}">
+                                <div style="margin-top:24px; padding-top:24px; border-top:1px solid var(--border); color:var(--muted); font-size:14px;">
+                                    <ui:fragment rendered="#{authBean.loggedIn}">
+                                        You must purchase this product to write a review.
+                                    </ui:fragment>
+                                    <ui:fragment rendered="#{not authBean.loggedIn}">
+                                        Please <h:link outcome="login.xhtml" value="log in" style="color:var(--primary);" /> to review products you've purchased.
+                                    </ui:fragment>
+                                </div>
+                            </ui:fragment>
+
+                        </div>
+                    </p:tab>
+                </p:tabView>
+            </div>
+        </h:form>
+    </ui:define>
+</ui:composition>

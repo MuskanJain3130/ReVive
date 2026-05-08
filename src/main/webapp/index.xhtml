@@ -1,77 +1,97 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
                 xmlns:ui="jakarta.faces.facelets"
                 xmlns:p="http://primefaces.org/ui"
                 template="/template.xhtml">
-    
+
     <ui:define name="content">
-        <div class="grid justify-content-center">
-            <div class="col-12 md:col-10 text-center mb-6">
-                <h1 class="text-5xl font-extrabold text-gray-900 mb-2">Sustainable Shopping <span class="text-primary-600">ReVive</span>d</h1>
-                <p class="text-xl text-gray-500">Discover quality secondhand treasures at unbeatable prices.</p>
+
+        <!-- Hero Banner -->
+        <div style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 60%, #3b82f6 100%); border-radius: 8px; padding: 36px 40px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; overflow: hidden; position: relative;">
+            <div style="position:relative; z-index:1;">
+                <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:rgba(255,255,255,0.7); margin-bottom:8px;">Sustainable Shopping</div>
+                <h1 style="font-size:2.2rem; font-weight:800; color:#fff; margin:0 0 10px; line-height:1.2;">Quality Pre-Owned<br/>Products at Best Prices</h1>
+                <p style="color:rgba(255,255,255,0.8); font-size:14px; margin:0 0 20px;">Discover secondhand treasures from verified sellers.</p>
+                <a href="register.xhtml" style="background:#f97316; color:white; font-weight:700; padding:10px 24px; border-radius:4px; text-decoration:none; font-size:14px; display:inline-block; transition:background 0.15s;">Start Selling</a>
             </div>
-            
-            <div class="col-12 md:col-10">
-                <h:form id="productForm">
-                    <p:dataView value="#{productBean.approvedProducts}" var="product" 
-                                gridIcon="pi pi-th-large" listIcon="pi pi-bars"
-                                layout="grid" paginator="true" rows="12" 
-                                gridRowStyleClass="grid row-gap-8 column-gap-4">
-                        
-                        <p:dataViewGridItem>
-                            <div>
-                                <div class="card-premium">
-                                <!-- Image Section -->
-                                    <div class="card-image-wrap">
-                                        <h:panelGroup rendered="#{not empty product.imageUrl}">
-                                            <img src="images/#{product.imageUrl}" alt="#{product.title}" />
-                                        </h:panelGroup>
-                                        <h:panelGroup rendered="#{empty product.imageUrl}">
-                                            <i class="bi bi-box-seam text-6xl text-gray-300"></i>
-                                        </h:panelGroup>
-                                    </div>
+            <i class="bi bi-recycle" style="font-size:7rem; color:rgba(255,255,255,0.08); position:absolute; right:40px; top:50%; transform:translateY(-50%);"></i>
+        </div>
 
-                                    <!-- Product Info -->
-                                    <div class="flex-grow-1">
-                                        <div class="flex justify-content-between align-items-center mb-2">
-                                            <p:tag value="#{product.productCondition}" severity="warning" styleClass="text-xs font-bold" />
-                                            <span class="text-xl font-black text-primary">₹#{product.price}</span>
-                                        </div>
-                                        
-                                        <h2 class="text-lg font-bold text-gray-900 mb-2 line-clamp-1">
-                                            #{product.title}
-                                        </h2>
-                                        
-                                        <p class="text-gray-500 text-sm mb-4 line-clamp-2">
-                                            #{product.description}
-                                        </p>
-                                    </div>
+        <!-- Product Section -->
+        <div class="section-header">
+            <span class="section-title"><i class="bi bi-grid-3x3-gap-fill" style="color:#2563eb; margin-right:8px;"></i>All Listings</span>
+            <span style="font-size:12px; color:#6b7280;">Approved &amp; Ready to Buy</span>
+        </div>
 
-                                    <!-- Purchase Actions -->
-                                    <div class="mt-auto">
-                                        <p:spinner id="qty" min="1" max="10" value="1" styleClass="w-full mb-3" />
-                                        
-                                        <div class="flex gap-2">
-                                            <p:commandButton value="Add" icon="pi pi-cart-plus"
-                                                           onclick="findQtyAndAdd(this.id, '#{product.title}', #{product.price}); return false;"
-                                                           rendered="#{not authBean.loggedIn}"
-                                                           styleClass="ui-button-primary flex-grow-1" />
-                                            
-                                            <p:commandButton value="Add" icon="pi pi-cart-plus"
-                                                           rendered="#{authBean.loggedIn}"
-                                                           styleClass="ui-button-primary flex-grow-1" />
-                                        </div>
-                                        <div class="text-center mt-3">
-                                            <span class="text-xs text-gray-400 font-semibold">Seller: @#{product.sellerid.username}</span>
-                                        </div>
-                                    </div>
+        <h:form id="productForm">
+            <p:outputPanel id="productContainer" styleClass="product-container">
+                <p:dataView value="#{productBean.filteredProducts}" var="product"
+                            layout="grid" paginator="true" rows="20"
+                            styleClass="my-product-grid"
+                            paginatorPosition="bottom"
+                            paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                            emptyMessage="No products found.">
+
+                <p:dataViewGridItem>
+                    <div class="product-tile">
+
+                        <h:link outcome="product.xhtml" style="display:block; text-decoration:none; color:inherit;">
+                            <f:param name="id" value="#{product.productid}" />
+                            <!-- Condition Badge -->
+                            <span class="tile-badge #{product.productCondition eq 'New' ? 'new' : (product.productCondition eq 'Like New' ? 'like-new' : (product.productCondition eq 'Good' ? 'good' : (product.productCondition eq 'Fair' ? 'fair' : 'poor')))}">
+                                #{product.productCondition}
+                            </span>
+
+                            <!-- Image Carousel -->
+                            <div class="tile-carousel" data-images="#{product.imageUrl}" data-title="#{product.title}">
+                                <!-- JS will build slides, arrows and thumbs here -->
+                            </div>
+
+                            <!-- Info -->
+                            <div class="tile-body">
+                                <div class="tile-title">#{product.title}</div>
+                                <div class="tile-desc">#{product.description}</div>
+                            </div>
+                        </h:link>
+
+                        <div class="tile-body" style="padding-top:0; padding-bottom:0;">
+                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                                <div class="tile-price" style="margin-bottom:0;">₹#{product.price}</div>
+                                <div class="qty-row" style="margin-bottom:0; display:flex; align-items:center; gap:6px;">
+                                    <span class="qty-label" style="font-size:12px; font-weight:600; color:#6b7280;">Qty:</span>
+                                    <input type="number" class="qty-select" id="qty_#{product.productid}" value="1" min="1" max="99" style="width:60px;" />
                                 </div>
                             </div>
-                        </p:dataViewGridItem>
-                    </p:dataView>
-                </h:form>
-            </div>
-        </div>
+                            <div class="tile-seller">Sold by <span>#{product.sellerid.username}</span></div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="tile-actions" style="padding: 0 12px 12px 12px;">
+
+                                <!-- Guest: add to local cart -->
+                                <h:panelGroup rendered="#{not authBean.loggedIn}">
+                                    <button type="button" class="btn-add"
+                                            onclick="addToGuestCart(#{product.productid}, '#{product.title}', #{product.price}, getQtyValue(document.getElementById('qty_#{product.productid}')))">
+                                        <i class="bi bi-cart-plus"></i> Add to Cart
+                                    </button>
+                                </h:panelGroup>
+
+                                <!-- Logged in: server-side add -->
+                                <h:panelGroup rendered="#{authBean.loggedIn}">
+                                    <button type="button" class="btn-add"
+                                            onclick="addToGuestCart(#{product.productid}, '#{product.title}', #{product.price}, getQtyValue(document.getElementById('qty_#{product.productid}')))">
+                                        <i class="bi bi-cart-plus"></i> Add to Cart
+                                    </button>
+                                </h:panelGroup>
+                            </div>
+                    </div>
+                </p:dataViewGridItem>
+
+                </p:dataView>
+            </p:outputPanel>
+        </h:form>
+
     </ui:define>
 </ui:composition>

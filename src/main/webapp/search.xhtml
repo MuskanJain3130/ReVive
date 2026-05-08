@@ -1,0 +1,231 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/template.xhtml">
+
+    <f:metadata>
+        <f:viewParam name="q" value="#{searchBean.query}" />
+        <f:viewAction action="#{searchBean.applyFilters}" />
+    </f:metadata>
+
+    <ui:define name="title">Search Results - ReVive</ui:define>
+
+    <ui:define name="content">
+        <style>
+            .search-layout {
+                display: flex;
+                gap: 24px;
+                max-width: 1300px;
+                margin: 0 auto;
+                padding: 24px;
+                align-items: flex-start;
+            }
+            .filter-sidebar {
+                width: 280px;
+                background: white;
+                border-radius: 8px;
+                padding: 20px;
+                border: 1px solid var(--border);
+                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                flex-shrink: 0;
+            }
+            .filter-main {
+                flex: 1;
+                min-width: 0;
+            }
+            .filter-section {
+                margin-bottom: 24px;
+            }
+            .filter-section h3 {
+                font-size: 14px;
+                font-weight: 700;
+                margin-bottom: 12px;
+                color: var(--text);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+            .filter-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 8px;
+            }
+            .price-inputs {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .price-inputs input {
+                width: 100%;
+                padding: 8px;
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                font-size: 13px;
+            }
+            .btn-apply {
+                width: 100%;
+                padding: 10px;
+                background: var(--primary);
+                color: white;
+                border: none;
+                border-radius: 4px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background 0.15s;
+            }
+            .btn-apply:hover {
+                background: var(--primary-dark);
+            }
+            .btn-clear {
+                width: 100%;
+                padding: 10px;
+                background: transparent;
+                color: var(--muted);
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                font-weight: 600;
+                cursor: pointer;
+                margin-top: 8px;
+                transition: all 0.15s;
+            }
+            .btn-clear:hover {
+                background: #f9fafb;
+                color: var(--text);
+            }
+            
+            @media (max-width: 900px) {
+                .search-layout {
+                    flex-direction: column;
+                }
+                .filter-sidebar {
+                    width: 100%;
+                }
+            }
+        </style>
+
+        <div class="search-layout">
+            <!-- Sidebar -->
+            <div class="filter-sidebar">
+                <h:form id="filterForm">
+                    <!-- Preserve Query -->
+                    <h:inputHidden value="#{searchBean.query}" />
+                    
+                    <div class="filter-section">
+                        <h3>Sort By</h3>
+                        <h:selectOneMenu value="#{searchBean.sortOption}" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 13px;">
+                            <f:selectItem itemValue="relevance" itemLabel="Relevance" />
+                            <f:selectItem itemValue="priceAsc" itemLabel="Price: Low to High" />
+                            <f:selectItem itemValue="priceDesc" itemLabel="Price: High to Low" />
+                            <f:selectItem itemValue="newest" itemLabel="Newest Arrivals" />
+                        </h:selectOneMenu>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h3>Price Range</h3>
+                        <div class="price-inputs">
+                            <h:inputText value="#{searchBean.minPrice}" p:placeholder="Min ₹" p:type="number">
+                                <f:passThroughAttribute name="placeholder" value="Min ₹"/>
+                                <f:passThroughAttribute name="type" value="number"/>
+                            </h:inputText>
+                            <span style="color:var(--muted)">-</span>
+                            <h:inputText value="#{searchBean.maxPrice}" p:placeholder="Max ₹" p:type="number">
+                                <f:passThroughAttribute name="placeholder" value="Max ₹"/>
+                                <f:passThroughAttribute name="type" value="number"/>
+                            </h:inputText>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h3>Condition</h3>
+                        <h:selectManyCheckbox value="#{searchBean.selectedConditions}" layout="pageDirection" styleClass="condition-checkboxes" style="font-size:13px; line-height:1.8;">
+                            <f:selectItem itemValue="New" itemLabel="New" />
+                            <f:selectItem itemValue="Like New" itemLabel="Like New" />
+                            <f:selectItem itemValue="Good" itemLabel="Good" />
+                            <f:selectItem itemValue="Fair" itemLabel="Fair" />
+                            <f:selectItem itemValue="Poor" itemLabel="Poor" />
+                        </h:selectManyCheckbox>
+                    </div>
+                    
+                    <p:commandButton value="Apply Filters" action="#{searchBean.applyFilters}" update=":resultsForm" oncomplete="initCarousels()" styleClass="ui-button-primary" style="width:100%; margin-bottom:8px;" />
+                    <p:commandButton value="Clear All" action="#{searchBean.clearFilters}" update="@form :resultsForm" oncomplete="initCarousels()" styleClass="ui-button-secondary ui-button-flat" style="width:100%; border:1px solid var(--border);" />
+                </h:form>
+            </div>
+
+            <!-- Main Content -->
+            <div class="filter-main">
+                <div style="margin-bottom: 20px; font-size:18px; font-weight:700;">
+                    <h:outputText value="Showing results for '#{searchBean.query}'" rendered="#{not empty searchBean.query}" />
+                    <h:outputText value="All Products" rendered="#{empty searchBean.query}" />
+                </div>
+                
+                <h:form id="resultsForm">
+                    <p:dataView var="product" value="#{searchBean.filteredProducts}"
+                                layout="grid" paginator="true" rows="20"
+                                styleClass="my-product-grid"
+                                paginatorPosition="bottom"
+                                paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                                emptyMessage="No products found matching your criteria.">
+
+                        <p:dataViewGridItem>
+                            <div class="product-tile">
+
+                                <h:link outcome="product.xhtml" style="display:block; text-decoration:none; color:inherit;">
+                                    <f:param name="id" value="#{product.productid}" />
+                                    <!-- Condition Badge -->
+                                    <span class="tile-badge #{product.productCondition eq 'New' ? 'new' : (product.productCondition eq 'Like New' ? 'like-new' : (product.productCondition eq 'Good' ? 'good' : (product.productCondition eq 'Fair' ? 'fair' : 'poor')))}">
+                                        #{product.productCondition}
+                                    </span>
+
+                                    <!-- Image Carousel -->
+                                    <div class="tile-carousel" data-images="#{product.imageUrl}" data-title="#{product.title}">
+                                        <!-- JS will build slides, arrows and thumbs here -->
+                                    </div>
+
+                                    <!-- Info -->
+                                    <div class="tile-body">
+                                        <div class="tile-title">#{product.title}</div>
+                                        <div class="tile-desc">#{product.description}</div>
+                                    </div>
+                                </h:link>
+
+                                <div class="tile-body" style="padding-top:0; padding-bottom:0;">
+                                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                                        <div class="tile-price" style="margin-bottom:0;">₹#{product.price}</div>
+                                        <div class="qty-row" style="margin-bottom:0; display:flex; align-items:center; gap:6px;">
+                                            <span class="qty-label" style="font-size:12px; font-weight:600; color:#6b7280;">Qty:</span>
+                                            <input type="number" class="qty-select" id="qty_#{product.productid}" value="1" min="1" max="99" style="width:60px;" />
+                                        </div>
+                                    </div>
+                                    <div class="tile-seller">Sold by <span>#{product.sellerid.username}</span></div>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="tile-actions" style="padding: 0 12px 12px 12px;">
+
+                                    <!-- Guest: add to local cart -->
+                                    <h:panelGroup rendered="#{not authBean.loggedIn}">
+                                        <button type="button" class="btn-add"
+                                                onclick="addToGuestCart(#{product.productid}, '#{product.title}', #{product.price}, getQtyValue(document.getElementById('qty_#{product.productid}')))">
+                                            <i class="bi bi-cart-plus"></i> Add to Cart
+                                        </button>
+                                    </h:panelGroup>
+
+                                    <!-- Logged in: server-side add -->
+                                    <h:panelGroup rendered="#{authBean.loggedIn}">
+                                        <button type="button" class="btn-add"
+                                                onclick="addToGuestCart(#{product.productid}, '#{product.title}', #{product.price}, getQtyValue(document.getElementById('qty_#{product.productid}')))">
+                                            <i class="bi bi-cart-plus"></i> Add to Cart
+                                        </button>
+                                    </h:panelGroup>
+                                </div>
+
+                            </div>
+                        </p:dataViewGridItem>
+                    </p:dataView>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

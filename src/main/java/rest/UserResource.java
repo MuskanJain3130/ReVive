@@ -11,6 +11,7 @@ import entities.ReturnRequests;
 import entities.Reviews;
 import entities.ShoppingCart;
 import entities.Wishlist;
+import entities.OrderDetails;
 import jakarta.ejb.EJB;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -116,5 +117,23 @@ public class UserResource {
     @Path("getUserByUsername/{username}")
     public entities.Users getUserByUsername(@PathParam("username") String username) {
         return userBean.getUserByUsername(username);
+    }
+
+    @GET
+    @Path("product/{id}")
+    public Products getProductById(@PathParam("id") int id) {
+        return userBean.getProductById(id);
+    }
+
+    @GET
+    @Path("product/{id}/reviews")
+    public List<Reviews> getReviewsForProduct(@PathParam("id") int id) {
+        return userBean.getReviewsForProduct(id);
+    }
+
+    @GET
+    @Path("orderDetails/{userId}/{productId}")
+    public OrderDetails getOrderDetailsForUserProduct(@PathParam("userId") int userId, @PathParam("productId") int productId) {
+        return userBean.getOrderDetailsForUserProduct(userId, productId);
     }
 }

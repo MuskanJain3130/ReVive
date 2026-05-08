@@ -25,7 +25,18 @@
 
                     <div id="cart-footer" class="hidden mt-6 pt-4 border-top-1 border-gray-100 flex justify-content-between align-items-center">
                         <div class="text-xl font-bold text-gray-900">Total: <span id="cart-total" class="text-primary-600">₹0</span></div>
-                        <p:commandButton value="Checkout Now" icon="pi pi-credit-card" styleClass="rounded-button ui-button-primary py-2 px-4 shadow-4" />
+                        
+                        <h:form id="checkoutForm">
+                            <h:inputHidden id="cartData" value="#{checkoutBean.cartJson}" />
+                            
+                            <h:panelGroup rendered="#{not authBean.loggedIn}">
+                                <h:button outcome="login" value="Login to Checkout" styleClass="rounded-button ui-button-secondary py-2 px-4 shadow-4" />
+                            </h:panelGroup>
+                            
+                            <h:panelGroup rendered="#{authBean.loggedIn}">
+                                <p:commandButton value="Proceed to Checkout" action="checkout?faces-redirect=true" onclick="document.getElementById('checkoutForm:cartData').value = localStorage.getItem('revive_cart');" styleClass="rounded-button ui-button-primary py-2 px-4 shadow-4" />
+                            </h:panelGroup>
+                        </h:form>
                     </div>
                 </div>
             </div>

@@ -56,6 +56,9 @@ public class Users implements Serializable {
     @Size(max = 100)
     @Column(name = "email")
     private String email;
+    @Size(max = 15)
+    @Column(name = "phone")
+    private String phone;
     @Size(max = 255)
     @Column(name = "password")
     private String password;
@@ -123,6 +126,14 @@ public class Users implements Serializable {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getPassword() {

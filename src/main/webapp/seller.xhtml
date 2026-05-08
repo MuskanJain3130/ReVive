@@ -38,8 +38,16 @@
                         </div>
                         
                         <div class="field mb-4">
-                            <p:outputLabel for="file" value="Product Image" styleClass="block mb-2 font-bold text-gray-700" />
-                            <p:fileUpload id="file" value="#{productBean.file}" mode="simple" skinSimple="true" />
+                            <p:outputLabel for="files" value="Product Images (up to 10)" styleClass="block mb-2 font-bold text-gray-700" />
+                            <p:fileUpload id="files" value="#{productBean.files}" mode="simple" skinSimple="true"
+                                         multiple="true"
+                                         allowTypes="/(\.|\/)(gif|jpe?g|png|webp)$/" />
+                            <small style="color:#6b7280; font-size:11px;">Select up to 10 images · JPG, PNG, GIF, WEBP</small>
+                        </div>
+
+                        <div class="field mb-4">
+                            <p:outputLabel for="quantity" value="Quantity Available" styleClass="block mb-2 font-bold text-gray-700" />
+                            <p:inputText id="quantity" value="#{productBean.newProduct.quantity}" placeholder="e.g. 1" required="true" />
                         </div>
                         
                         <div class="field mb-6">
@@ -47,8 +55,9 @@
                             <p:inputTextarea id="description" value="#{productBean.newProduct.description}" rows="4" placeholder="Describe your item's history, features, or any flaws..." />
                         </div>
                         
-                        <p:commandButton value="Post Item for Approval" action="#{productBean.addProduct}" 
-                                       styleClass="ui-button-primary w-full shadow-4" />
+                        <p:commandButton value="Post Item for Approval" action="#{productBean.addProduct}"
+                                       ajax="false"
+                                       styleClass="ui-button-primary w-full" />
                     </div>
                 </div>
                 

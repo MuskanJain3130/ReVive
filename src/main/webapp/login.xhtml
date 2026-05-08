@@ -4,42 +4,96 @@
                 xmlns:ui="jakarta.faces.facelets"
                 xmlns:p="http://primefaces.org/ui"
                 template="/template.xhtml">
-    
+
     <ui:define name="content">
-        <div class="flex flex-column align-items-center justify-content-center" style="min-height: 70vh">
-            <div class="card-premium text-center" style="width: 100%; max-width: 420px">
-                <i class="bi bi-person-circle text-7xl text-primary mb-4"></i>
-                <h1 class="text-3xl font-black text-gray-900 mb-2">Welcome Back</h1>
-                <p class="text-gray-500 mb-6 font-medium">Log in to manage your ReVive treasures.</p>
-                
-                <h:form id="loginForm">
-                    <p:messages id="msgs" showDetail="false" closable="true" />
-                    
-                    <div class="field mb-4 text-left">
-                        <p:outputLabel for="username" value="Username" styleClass="block mb-2 font-bold text-gray-700" />
-                        <p:inputText id="username" value="#{authBean.username}" placeholder="e.g. admin" 
-                                   required="true" requiredMessage="Username is required" />
+        <div style="min-height:82vh; display:flex; align-items:center; justify-content:center; padding: 24px 0;">
+            <div style="display:flex; width:100%; max-width:900px; border-radius:12px; overflow:hidden; box-shadow:0 8px 40px rgba(0,0,0,0.12);">
+
+                <!-- Left: Brand Panel -->
+                <div style="flex:1; background:linear-gradient(145deg,#1e3a8a 0%,#2563eb 100%); padding:48px 40px; display:flex; flex-direction:column; justify-content:center; color:white; min-width:0;">
+                    <div style="font-size:1.8rem; font-weight:800; letter-spacing:-0.5px; margin-bottom:8px; display:flex; align-items:center; gap:10px;">
+                        <i class="bi bi-recycle"></i> ReVive
                     </div>
-                    
-                    <div class="field mb-6 text-left">
-                        <p:outputLabel for="password" value="Password" styleClass="block mb-2 font-bold text-gray-700" />
-                        <p:password id="password" value="#{authBean.password}" placeholder="••••••••" 
-                                  toggleMask="true" required="true" requiredMessage="Password is required" />
+                    <p style="color:rgba(255,255,255,0.7); font-size:14px; margin:0 0 36px;">India's sustainable secondhand marketplace.</p>
+
+                    <div style="display:flex; flex-direction:column; gap:20px;">
+                        <div style="display:flex; align-items:flex-start; gap:14px;">
+                            <div style="background:rgba(255,255,255,0.15); border-radius:8px; width:38px; height:38px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                <i class="bi bi-shield-check" style="font-size:1.1rem;"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight:700; font-size:14px; margin-bottom:2px;">Verified Sellers</div>
+                                <div style="color:rgba(255,255,255,0.65); font-size:12.5px;">Every listing is reviewed by our admin team.</div>
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:flex-start; gap:14px;">
+                            <div style="background:rgba(255,255,255,0.15); border-radius:8px; width:38px; height:38px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                <i class="bi bi-tag" style="font-size:1.1rem;"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight:700; font-size:14px; margin-bottom:2px;">Best Prices</div>
+                                <div style="color:rgba(255,255,255,0.65); font-size:12.5px;">Quality products at unbeatable secondhand prices.</div>
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:flex-start; gap:14px;">
+                            <div style="background:rgba(255,255,255,0.15); border-radius:8px; width:38px; height:38px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                <i class="bi bi-arrow-repeat" style="font-size:1.1rem;"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight:700; font-size:14px; margin-bottom:2px;">Circular Economy</div>
+                                <div style="color:rgba(255,255,255,0.65); font-size:12.5px;">Give products a second life. Good for you and the planet.</div>
+                            </div>
+                        </div>
                     </div>
-                    
-                    <p:commandButton value="Sign In" action="#{authBean.login}" update="msgs"
-                                   styleClass="ui-button-primary w-full shadow-4" />
-                </h:form>
-                
-                <div class="mt-8 pt-4 border-top-1 border-gray-100 flex justify-content-between align-items-center">
-                    <span class="text-sm text-gray-400 font-semibold">New to ReVive?</span>
-                    <h:link outcome="register" value="Create Account" styleClass="text-sm font-bold text-primary no-underline hover:underline" />
+
+                    <!-- Demo credentials hint -->
+                    <div style="margin-top:40px; padding:14px 16px; background:rgba(255,255,255,0.1); border-radius:8px; border:1px solid rgba(255,255,255,0.2);">
+                        <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:rgba(255,255,255,0.6); margin-bottom:8px;">Demo Credentials</div>
+                        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                            <code style="background:rgba(0,0,0,0.2); color:#bfdbfe; padding:3px 10px; border-radius:4px; font-size:12px;">admin / 123</code>
+                            <code style="background:rgba(0,0,0,0.2); color:#bfdbfe; padding:3px 10px; border-radius:4px; font-size:12px;">seller / 123</code>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="mt-6 flex gap-4 opacity-60 hover:opacity-100 transition-opacity">
-                <div class="px-3 py-1 border-round-lg bg-white border-1 border-gray-200 text-xs text-gray-400 font-mono">admin / 123</div>
-                <div class="px-3 py-1 border-round-lg bg-white border-1 border-gray-200 text-xs text-gray-400 font-mono">seller / 123</div>
+
+                <!-- Right: Form Panel -->
+                <div style="flex:1; background:#ffffff; padding:48px 40px; display:flex; flex-direction:column; justify-content:center; min-width:0;">
+                    <h1 style="font-size:1.6rem; font-weight:800; color:#111827; margin:0 0 6px;">Welcome back</h1>
+                    <p style="color:#6b7280; font-size:14px; margin:0 0 32px;">Sign in to your ReVive account.</p>
+
+                    <h:form id="loginForm">
+                        <p:messages id="msgs" showDetail="false" closable="true" style="margin-bottom:16px;" />
+
+                        <div style="margin-bottom:20px;">
+                            <label style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">Username</label>
+                            <p:inputText id="username" value="#{authBean.username}"
+                                         placeholder="Enter your username"
+                                         required="true" requiredMessage="Username is required"
+                                         style="width:100%;" />
+                        </div>
+
+                        <div style="margin-bottom:28px;">
+                            <label style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">Password</label>
+                            <p:password id="password" value="#{authBean.password}"
+                                        placeholder="••••••••"
+                                        toggleMask="true"
+                                        required="true" requiredMessage="Password is required"
+                                        style="width:100%;" />
+                        </div>
+
+                        <p:commandButton value="Sign In" action="#{authBean.login}"
+                                         update="msgs"
+                                         styleClass="ui-button-primary"
+                                         style="width:100%; padding:11px; font-size:14px; font-weight:700;" />
+                    </h:form>
+
+                    <div style="margin-top:28px; padding-top:24px; border-top:1px solid #f3f4f6; display:flex; justify-content:center; align-items:center; gap:8px;">
+                        <span style="font-size:13px; color:#9ca3af;">Don't have an account?</span>
+                        <h:link outcome="register" value="Create one →"
+                                style="font-size:13px; font-weight:700; color:#2563eb; text-decoration:none;" />
+                    </div>
+                </div>
+
             </div>
         </div>
     </ui:define>

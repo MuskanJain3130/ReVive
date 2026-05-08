@@ -97,7 +97,6 @@ public class Products implements Serializable {
     private Collection<OrderDetails> orderDetailsCollection;
     @JoinColumn(name = "sellerid", referencedColumnName = "userid")
     @ManyToOne
-    @JsonbTransient
     private Users sellerid;
     @JoinColumn(name = "approved_by", referencedColumnName = "userid")
     @ManyToOne

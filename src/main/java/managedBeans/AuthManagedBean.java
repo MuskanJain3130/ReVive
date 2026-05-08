@@ -34,8 +34,14 @@ public class AuthManagedBean implements Serializable {
     private Users newUser = new Users();
     private String username;
     private String password;
-    private String selectedRoleId = "2"; // Default to Buyer
+    private String selectedRoleId = "2"; // Default to User
     private boolean loggedIn = false;
+    
+    // OTP Fields
+    private String inputOtp;
+    private String generatedOtp;
+    private boolean otpSent = false;
+    private boolean otpVerified = false;
 
     public void login() {
         AuthenticationStatus result = authenticate();
@@ -60,11 +66,44 @@ public class AuthManagedBean implements Serializable {
         }
     }
 
+    public void sendOtp() {
+        if (newUser.getPhone() == null || newUser.getPhone().trim().isEmpty()) {
+            facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Please enter a phone number first."));
+            return;
+        }
+        
+        // Generate a 6-digit OTP
+        generatedOtp = String.valueOf((int) (Math.random() * 900000) + 100000);
+        otpSent = true;
+        
+        // Mock print to console
+        System.out.println("========================================");
+        System.out.println("[ReVive OTP] Your verification code is: " + generatedOtp);
+        System.out.println("========================================");
+        
+        facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "OTP Sent", "A mock verification code has been printed to the server log."));
+    }
+
+    public void verifyOtp() {
+        if (generatedOtp != null && generatedOtp.equals(inputOtp)) {
+            otpVerified = true;
+            facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Verified", "Phone number verified successfully."));
+        } else {
+            facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Invalid OTP", "The code you entered is incorrect."));
+        }
+    }
+
     public String register() {
+        if (!otpVerified) {
+            facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Please verify your phone number first."));
+            return null;
+        }
         try {
             userClient.registerUser(newUser, selectedRoleId);
             facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Registration Successful", "You can now log in."));
             newUser = new Users(); // Reset
+            otpSent = false;
+            otpVerified = false;
             return "login?faces-redirect=true";
         } catch (Exception e) {
             facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Registration Failed", e.getMessage()));
@@ -94,16 +133,28 @@ public class AuthManagedBean implements Serializable {
     }
 
     public boolean isAdmin() {
-        return securityContext.isCallerInRole("admin") || securityContext.isCallerInRole("Admin");
+        return currentUser != null
+            && currentUser.getRoleid() != null
+            && Integer.valueOf(1).equals(currentUser.getRoleid().getRoleid());
     }
 
     public boolean isUser() {
-        return securityContext.isCallerInRole("user") || securityContext.isCallerInRole("User");
+        return currentUser != null
+            && currentUser.getRoleid() != null
+            && Integer.valueOf(2).equals(currentUser.getRoleid().getRoleid());
     }
 
     public boolean isSeller() {
-        return securityContext.isCallerInRole("seller") || securityContext.isCallerInRole("Seller") || isAdmin();
+        return currentUser != null
+            && currentUser.getRoleid() != null
+            && Integer.valueOf(3).equals(currentUser.getRoleid().getRoleid());
     }
+
+    public boolean isBuyer() {
+        return isUser();
+    }
+
+
 
     // Getters and Setters
     public Users getCurrentUser() { return currentUser; }
@@ -117,4 +168,9 @@ public class AuthManagedBean implements Serializable {
     public String getSelectedRoleId() { return selectedRoleId; }
     public void setSelectedRoleId(String selectedRoleId) { this.selectedRoleId = selectedRoleId; }
     public boolean isLoggedIn() { return loggedIn; }
+    
+    public String getInputOtp() { return inputOtp; }
+    public void setInputOtp(String inputOtp) { this.inputOtp = inputOtp; }
+    public boolean isOtpSent() { return otpSent; }
+    public boolean isOtpVerified() { return otpVerified; }
 }

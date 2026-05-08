@@ -3,8 +3,7 @@ package managedBeans;
 import client.UserClient;
 import entities.Products;
 import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.faces.context.FacesContext;
+import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import java.io.File;
@@ -14,11 +13,13 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import jakarta.ws.rs.core.GenericType;
 import org.primefaces.model.file.UploadedFile;
+import org.primefaces.model.file.UploadedFiles;
 
 @Named("productBean")
-@RequestScoped
+@ViewScoped
 public class ProductManagedBean implements Serializable {
 
     @Inject
@@ -28,7 +29,9 @@ public class ProductManagedBean implements Serializable {
     private Products newProduct = new Products();
     private List<Products> myProducts = new ArrayList<>();
     private List<Products> approvedProducts = new ArrayList<>();
-    private UploadedFile file;
+    private List<Products> filteredProducts = new ArrayList<>();
+    private String searchKeyword;
+    private UploadedFiles files;  // multiple file upload
 
     @PostConstruct
     public void init() {
@@ -39,8 +42,10 @@ public class ProductManagedBean implements Serializable {
     public void loadProducts() {
         try {
             approvedProducts = userClient.getAllApprovedProducts(new GenericType<List<Products>>() {});
+            filterProducts();
         } catch (Exception e) {
             approvedProducts = new ArrayList<>();
+            filteredProducts = new ArrayList<>();
         }
 
         if (authBean.isLoggedIn() && authBean.getCurrentUser() != null) {
@@ -52,37 +57,93 @@ public class ProductManagedBean implements Serializable {
         }
     }
 
+    public List<String> completeSearch(String query) {
+        String q = query.toLowerCase();
+        return approvedProducts.stream()
+                .filter(p -> p.getTitle().toLowerCase().contains(q))
+                .map(Products::getTitle)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    public void filterProducts() {
+        if (searchKeyword == null || searchKeyword.trim().isEmpty()) {
+            filteredProducts = new ArrayList<>(approvedProducts);
+        } else {
+            String q = searchKeyword.toLowerCase().trim();
+            filteredProducts = approvedProducts.stream()
+                    .filter(p -> p.getTitle().toLowerCase().contains(q))
+                    .collect(Collectors.toList());
+        }
+    }
+
     public String addProduct() {
         if (authBean.isLoggedIn() && authBean.getCurrentUser() != null) {
-            
-            // Handle File Upload
-            if (file != null && file.getFileName() != null && !file.getFileName().isEmpty()) {
-                try {
-                    String extension = file.getFileName().substring(file.getFileName().lastIndexOf("."));
-                    String newFileName = UUID.randomUUID().toString() + extension;
-                    
-                    // Path to project webapp/images folder
-                    String path = FacesContext.getCurrentInstance().getExternalContext().getRealPath("/images");
-                    File folder = new File(path);
-                    if (!folder.exists()) folder.mkdirs();
-                    
-                    File savedFile = new File(folder, newFileName);
-                    try (InputStream input = file.getInputStream();
-                         FileOutputStream output = new FileOutputStream(savedFile)) {
-                        byte[] buffer = new byte[1024];
-                        int length;
-                        while ((length = input.read(buffer)) > 0) {
-                            output.write(buffer, 0, length);
-                        }
+
+            System.out.println("[ReVive] addProduct() called by user: " + authBean.getCurrentUser().getUsername());
+            System.out.println("[ReVive] files bean = " + files);
+            System.out.println("[ReVive] files list = " + (files != null ? files.getFiles() : "null"));
+
+            // Handle multiple file uploads — join with semicolon, max 10
+            if (files != null && files.getFiles() != null && !files.getFiles().isEmpty()) {
+                System.out.println("[ReVive] Number of files received: " + files.getFiles().size());
+                List<String> savedNames = new ArrayList<>();
+                int count = 0;
+                for (UploadedFile file : files.getFiles()) {
+                    if (count >= 10) break;
+                    if (file == null || file.getFileName() == null || file.getFileName().isEmpty()) {
+                        System.out.println("[ReVive] Skipping null/empty file at index " + count);
+                        continue;
                     }
-                    newProduct.setImageUrl(newFileName);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    System.out.println("[ReVive] Processing file: " + file.getFileName() + " size=" + file.getSize());
+                    try {
+                        String ext = file.getFileName().substring(file.getFileName().lastIndexOf("."));
+                        String newFileName = UUID.randomUUID().toString() + ext;
+
+                        // Hardcoded path to the webapp images directory
+                        String path = "D:\\ReVive\\src\\main\\webapp\\images";
+                        System.out.println("[ReVive] Using hardcoded images path: " + path);
+
+                        File folder = new File(path);
+                        if (!folder.exists()) {
+                            boolean created = folder.mkdirs();
+                            System.out.println("[ReVive] Created folder: " + folder.getAbsolutePath() + " -> " + created);
+                        }
+
+                        File savedFile = new File(folder, newFileName);
+                        try (InputStream input = file.getInputStream();
+                             FileOutputStream output = new FileOutputStream(savedFile)) {
+                            byte[] buffer = new byte[8192];
+                            int length;
+                            while ((length = input.read(buffer)) > 0) {
+                                output.write(buffer, 0, length);
+                            }
+                        }
+                        System.out.println("[ReVive] Saved file to: " + savedFile.getAbsolutePath() + " exists=" + savedFile.exists() + " size=" + savedFile.length());
+                        savedNames.add(newFileName);
+                        count++;
+                    } catch (Exception e) {
+                        System.out.println("[ReVive] ERROR saving file: " + e.getMessage());
+                        e.printStackTrace();
+                    }
                 }
+                if (!savedNames.isEmpty()) {
+                    newProduct.setImageUrl(String.join(";", savedNames));
+                    System.out.println("[ReVive] imageUrl set to: " + newProduct.getImageUrl());
+                }
+            } else {
+                System.out.println("[ReVive] No files uploaded (files is null or empty)");
             }
-            
+
+            // Guard: image_url column is NOT NULL
+            if (newProduct.getImageUrl() == null || newProduct.getImageUrl().isEmpty()) {
+                newProduct.setImageUrl("placeholder.png");
+                System.out.println("[ReVive] No image uploaded, using placeholder.png");
+            }
+
+            System.out.println("[ReVive] Saving product: " + newProduct.getTitle() + " imageUrl=" + newProduct.getImageUrl());
             userClient.addProduct(newProduct, String.valueOf(authBean.getCurrentUser().getUserid()));
-            newProduct = new Products(); // Reset
+            newProduct = new Products();
             return "seller?faces-redirect=true";
         }
         return null;
@@ -93,6 +154,9 @@ public class ProductManagedBean implements Serializable {
     public void setNewProduct(Products newProduct) { this.newProduct = newProduct; }
     public List<Products> getMyProducts() { return myProducts; }
     public List<Products> getApprovedProducts() { return approvedProducts; }
-    public UploadedFile getFile() { return file; }
-    public void setFile(UploadedFile file) { this.file = file; }
+    public List<Products> getFilteredProducts() { return filteredProducts; }
+    public String getSearchKeyword() { return searchKeyword; }
+    public void setSearchKeyword(String searchKeyword) { this.searchKeyword = searchKeyword; }
+    public UploadedFiles getFiles() { return files; }
+    public void setFiles(UploadedFiles files) { this.files = files; }
 }
