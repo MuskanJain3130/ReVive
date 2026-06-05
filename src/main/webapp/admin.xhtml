@@ -8,127 +8,295 @@
 
     <ui:define name="content">
         <h:form id="adminForm">
+            <p:growl id="growl" showDetail="true" keepAlive="true" />
 
-            <!-- Full-width table panel -->
             <div class="px-3 py-3">
-                <div class="border-round-xl bg-white shadow-2 overflow-hidden">
-                    <p:dataTable id="productsTable" widgetVar="dtProducts"
-                                 value="#{adminBean.allProducts}" var="p"
-                                 paginator="true" rows="15"
-                                 paginatorPosition="bottom"
-                                 paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
-                                 rowStyleClass="#{p.approvalStatus eq 'Pending' ? 'bg-yellow-50' : ''}"
-                                 filteredValue="#{adminBean.filteredProducts}"
-                                 globalFilterOnly="true"
-                                 style="width:100%"
-                                 tableStyle="width:100%"
-                                 styleClass="admin-table">
-
-                        <f:facet name="header">
-                            <div class="flex justify-content-between align-items-center px-3 py-2">
-                                <h2 class="text-xl font-bold m-0 text-gray-900">Inventory &amp; Approvals</h2>
-                                <span class="p-input-icon-left">
-                                    <i class="pi pi-search" style="top:50%;transform:translateY(-50%)"/>
-                                    <p:inputText id="globalFilter"
-                                                 onkeyup="PF('dtProducts').filter()"
-                                                 placeholder="Search products..."
-                                                 styleClass="search-input"
-                                                 style="width:280px; padding-left:2.2rem;" />
-                                </span>
-                            </div>
-                        </f:facet>
-
-                        <!-- Image: show first image only (imageUrl may be semicolon-separated) -->
-                        <p:column headerText="Image" style="width:80px; text-align:center">
-                            <h:panelGroup rendered="#{not empty p.imageUrl and p.imageUrl ne 'placeholder.png'}">
-                                <ui:param name="firstImg" value="#{p.imageUrl.split(';')[0]}" />
-                                <img src="#{request.contextPath}/images/#{firstImg}"
-                                     width="56" height="56"
-                                     style="border-radius:8px; object-fit:cover; border:1px solid #e5e7eb; display:block; margin:0 auto;"
-                                     alt="#{p.title}" />
-                            </h:panelGroup>
-                            <h:panelGroup rendered="#{empty p.imageUrl or p.imageUrl eq 'placeholder.png'}">
-                                <div style="width:56px;height:56px;border-radius:8px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;margin:0 auto;">
-                                    <i class="pi pi-image" style="color:#d1d5db; font-size:1.5rem;"/>
+                <p:tabView id="adminTabView" styleClass="shadow-2 border-round-xl overflow-hidden">
+                    
+                    <!-- Tab 1: Products Inventory & Approvals -->
+                    <p:tab title="Inventory &amp; Approvals">
+                        <p:dataTable id="productsTable" widgetVar="dtProducts"
+                                     value="#{adminBean.allProducts}" var="p"
+                                     paginator="true" rows="15"
+                                     paginatorPosition="bottom"
+                                     paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                                     rowStyleClass="#{p.approvalStatus eq 'Pending' ? 'bg-yellow-50' : ''}"
+                                     filteredValue="#{adminBean.filteredProducts}"
+                                     globalFilterOnly="true"
+                                     style="width:100%"
+                                     tableStyle="width:100%"
+                                     styleClass="admin-table">
+            
+                            <f:facet name="header">
+                                <div class="flex justify-content-between align-items-center px-3 py-2">
+                                    <h2 class="text-xl font-bold m-0 text-gray-900">Inventory &amp; Approvals</h2>
+                                    <span class="p-input-icon-left">
+                                        <i class="pi pi-search" style="top:50%;transform:translateY(-50%)"/>
+                                        <p:inputText id="globalFilter"
+                                                     onkeyup="PF('dtProducts').filter()"
+                                                     placeholder="Search products..."
+                                                     styleClass="search-input"
+                                                     style="width:280px; padding-left:2.2rem;" />
+                                    </span>
                                 </div>
-                            </h:panelGroup>
-                        </p:column>
-
-                        <!-- Item Details -->
-                        <p:column headerText="Item Details" sortBy="#{p.title}" style="min-width:200px">
-                            <div class="font-bold text-gray-900 text-sm">#{p.title}</div>
-                            <div class="text-xs text-gray-500 mt-1">
-                                <p:tag value="#{p.productCondition}" styleClass="mr-1"
-                                       severity="#{p.productCondition eq 'Like New' ? 'success' : (p.productCondition eq 'Good' ? 'info' : 'warning')}" />
-                                <span class="font-semibold text-gray-700">₹#{p.price}</span>
-                            </div>
-                        </p:column>
-
-                        <!-- Seller -->
-                        <p:column headerText="Seller" sortBy="#{p.sellerid.username}" style="min-width:150px">
-                            <div class="flex align-items-center gap-2">
-                                <div class="flex align-items-center justify-content-center border-circle bg-blue-100 text-blue-700 font-bold"
-                                     style="width:32px;height:32px;font-size:0.8rem;flex-shrink:0">
-                                    #{not empty p.sellerid.username ? p.sellerid.username.substring(0,1).toUpperCase() : '?'}
-                                </div>
-                                <div>
-                                    <div class="text-sm font-semibold text-gray-800">#{p.sellerid.username}</div>
-                                    <div class="text-xs text-gray-400">#{p.sellerid.email}</div>
-                                </div>
-                            </div>
-                        </p:column>
-
-                        <!-- Description -->
-                        <p:column headerText="Description" style="min-width:220px">
-                            <div class="text-sm text-gray-600" style="max-height:2.8rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">
-                                #{p.description}
-                            </div>
-                        </p:column>
-
-                        <!-- Qty -->
-                        <p:column headerText="Qty" sortBy="#{p.quantity}" style="width:60px;text-align:center">
-                            <div class="font-bold text-gray-800 text-sm">#{p.quantity}</div>
-                        </p:column>
-
-                        <!-- Status -->
-                        <p:column headerText="Status" sortBy="#{p.approvalStatus}"
-                                  filterBy="#{p.approvalStatus}" filterMatchMode="exact"
-                                  style="width:120px;text-align:center">
-                            <f:facet name="filter">
-                                <p:selectOneMenu onchange="PF('dtProducts').filter()">
-                                    <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
-                                    <f:selectItem itemLabel="Pending"  itemValue="Pending" />
-                                    <f:selectItem itemLabel="Approved" itemValue="Approved" />
-                                    <f:selectItem itemLabel="Rejected" itemValue="Rejected" />
-                                </p:selectOneMenu>
                             </f:facet>
-                            <p:tag value="#{p.approvalStatus}"
-                                   severity="#{p.approvalStatus eq 'Approved' ? 'success' : (p.approvalStatus eq 'Rejected' ? 'danger' : 'warning')}" />
-                        </p:column>
+            
+                            <!-- Image: show first image only (imageUrl may be semicolon-separated) -->
+                            <p:column headerText="Image" style="width:80px; text-align:center">
+                                <h:panelGroup rendered="#{not empty p.imageUrl and p.imageUrl ne 'placeholder.png'}">
+                                    <ui:param name="firstImg" value="#{p.imageUrl.split(';')[0]}" />
+                                    <img src="#{request.contextPath}/images/#{firstImg}"
+                                         width="56" height="56"
+                                         style="border-radius:8px; object-fit:cover; border:1px solid #e5e7eb; display:block; margin:0 auto;"
+                                         alt="#{p.title}" />
+                                </h:panelGroup>
+                                <h:panelGroup rendered="#{empty p.imageUrl or p.imageUrl eq 'placeholder.png'}">
+                                    <div style="width:56px;height:56px;border-radius:8px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;margin:0 auto;">
+                                        <i class="pi pi-image" style="color:#d1d5db; font-size:1.5rem;"/>
+                                    </div>
+                                </h:panelGroup>
+                            </p:column>
+            
+                            <!-- Item Details -->
+                            <p:column headerText="Item Details" sortBy="#{p.title}" style="min-width:200px">
+                                <div class="font-bold text-gray-900 text-sm">#{p.title}</div>
+                                <div class="text-xs text-gray-500 mt-1">
+                                    <p:tag value="#{p.productCondition}" styleClass="mr-1"
+                                           severity="#{p.productCondition eq 'Like New' ? 'success' : (p.productCondition eq 'Good' ? 'info' : 'warning')}" />
+                                    <span class="font-semibold text-gray-700">₹#{p.price}</span>
+                                </div>
+                            </p:column>
+            
+                            <!-- Seller -->
+                            <p:column headerText="Seller" sortBy="#{p.sellerid.username}" style="min-width:150px">
+                                <div class="flex align-items-center gap-2">
+                                    <div class="flex align-items-center justify-content-center border-circle bg-blue-100 text-blue-700 font-bold"
+                                         style="width:32px;height:32px;font-size:0.8rem;flex-shrink:0">
+                                        #{not empty p.sellerid.username ? p.sellerid.username.substring(0,1).toUpperCase() : '?'}
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-semibold text-gray-800">#{p.sellerid.username}</div>
+                                        <div class="text-xs text-gray-400">#{p.sellerid.email}</div>
+                                    </div>
+                                </div>
+                            </p:column>
+            
+                            <!-- Description -->
+                            <p:column headerText="Description" style="min-width:220px">
+                                <div class="text-sm text-gray-600" style="max-height:2.8rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">
+                                    #{p.description}
+                                </div>
+                            </p:column>
+            
+                            <!-- Qty -->
+                            <p:column headerText="Qty" sortBy="#{p.quantity}" style="width:60px;text-align:center">
+                                <div class="font-bold text-gray-800 text-sm">#{p.quantity}</div>
+                            </p:column>
+            
+                            <!-- Status -->
+                            <p:column headerText="Status" sortBy="#{p.approvalStatus}"
+                                      filterBy="#{p.approvalStatus}" filterMatchMode="exact"
+                                      style="width:120px;text-align:center">
+                                <f:facet name="filter">
+                                    <p:selectOneMenu onchange="PF('dtProducts').filter()">
+                                        <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                                        <f:selectItem itemLabel="Pending"  itemValue="Pending" />
+                                        <f:selectItem itemLabel="Approved" itemValue="Approved" />
+                                        <f:selectItem itemLabel="Rejected" itemValue="Rejected" />
+                                    </p:selectOneMenu>
+                                </f:facet>
+                                <p:tag value="#{p.approvalStatus}"
+                                       severity="#{p.approvalStatus eq 'Approved' ? 'success' : (p.approvalStatus eq 'Rejected' ? 'danger' : 'warning')}" />
+                            </p:column>
+            
+                            <!-- Actions -->
+                            <p:column headerText="Actions" style="width:140px;text-align:center">
+                                <!-- Approve / Reject only for Pending -->
+                                <p:commandButton icon="pi pi-check" title="Approve"
+                                                 rendered="#{p.approvalStatus eq 'Pending'}"
+                                                 actionListener="#{adminBean.approve(p.productid)}"
+                                                 styleClass="ui-button-success rounded-button mr-1"
+                                                 update=":adminForm" />
+                                <p:commandButton icon="pi pi-times" title="Reject"
+                                                 rendered="#{p.approvalStatus eq 'Pending'}"
+                                                 actionListener="#{adminBean.reject(p.productid)}"
+                                                 styleClass="ui-button-danger rounded-button mr-1"
+                                                 update=":adminForm" />
+            
+                                <!-- Eye — view details -->
+                                <p:commandButton icon="pi pi-eye" title="View Details"
+                                                 styleClass="ui-button-secondary rounded-button"
+                                                 actionListener="#{adminBean.selectProduct(p)}"
+                                                 update=":adminForm:productDetailDialog"
+                                                 oncomplete="PF('productDetailDlg').show(); setTimeout(function(){ var el = document.querySelector('#adminForm\\:productDetailContent .tile-carousel'); if(el) rebuildCarousels(); }, 300);" />
+                            </p:column>
+                        </p:dataTable>
+                    </p:tab>
 
-                        <!-- Actions -->
-                        <p:column headerText="Actions" style="width:140px;text-align:center">
-                            <!-- Approve / Reject only for Pending -->
-                            <p:commandButton icon="pi pi-check" title="Approve"
-                                             rendered="#{p.approvalStatus eq 'Pending'}"
-                                             actionListener="#{adminBean.approve(p.productid)}"
-                                             styleClass="ui-button-success rounded-button mr-1"
-                                             update=":adminForm" />
-                            <p:commandButton icon="pi pi-times" title="Reject"
-                                             rendered="#{p.approvalStatus eq 'Pending'}"
-                                             actionListener="#{adminBean.reject(p.productid)}"
-                                             styleClass="ui-button-danger rounded-button mr-1"
-                                             update=":adminForm" />
+                    <!-- Tab 2: Orders Management -->
+                    <p:tab title="Orders Management">
+                        <div class="p-3">
+                            <p:dataTable id="ordersTable" value="#{adminBean.allOrders}" var="o"
+                                         paginator="true" rows="15" paginatorPosition="bottom"
+                                         emptyMessage="No orders found."
+                                         styleClass="ui-datatable-striped shadow-1">
+                                
+                                <p:column headerText="Order ID" width="100" sortBy="#{o.orderid}">
+                                    <span class="font-bold">##{o.orderid}</span>
+                                </p:column>
+                                
+                                <p:column headerText="Buyer" sortBy="#{o.buyerid.username}">
+                                    <span class="font-semibold text-gray-800">#{o.buyerid.username}</span>
+                                    <span class="text-xs text-gray-400 block">#{o.buyerid.email}</span>
+                                </p:column>
+                                
+                                <p:column headerText="Order Date">
+                                    <h:outputText value="#{o.orderdate}">
+                                        <f:convertDateTime pattern="dd MMM yyyy HH:mm" />
+                                    </h:outputText>
+                                </p:column>
+                                
+                                <p:column headerText="Shipping Address">
+                                    <span class="text-xs font-medium block">#{o.addressid.fullname}</span>
+                                    <span class="text-xs text-gray-600 block">#{o.addressid.street}, #{o.addressid.city}</span>
+                                </p:column>
+                                
+                                <p:column headerText="Items" width="220">
+                                    <ui:repeat value="#{o.orderDetailsCollection}" var="od">
+                                        <div class="text-xs text-gray-700">#{od.productid.title} (Qty: #{od.quantity})</div>
+                                    </ui:repeat>
+                                </p:column>
+                                
+                                <p:column headerText="Total Amount">
+                                    <ui:repeat value="#{o.paymentsCollection}" var="pay">
+                                        <span class="font-bold text-blue-700">₹#{pay.amount}</span>
+                                        <span class="text-xs text-gray-400 block">via #{pay.paymentMode} (#{pay.paymentStatus})</span>
+                                    </ui:repeat>
+                                </p:column>
+                                
+                                <p:column headerText="Status" width="180">
+                                    <p:selectOneMenu value="#{o.status}" style="width: 100%">
+                                        <f:selectItem itemLabel="Placed" itemValue="Placed" />
+                                        <f:selectItem itemLabel="Packed" itemValue="Packed" />
+                                        <f:selectItem itemLabel="Shipped" itemValue="Shipped" />
+                                        <f:selectItem itemLabel="Delivered" itemValue="Delivered" />
+                                        <f:selectItem itemLabel="Cancelled" itemValue="Cancelled" />
+                                        <f:selectItem itemLabel="Returned" itemValue="Returned" />
+                                        <p:ajax listener="#{adminBean.updateOrderStatus(o.orderid, o.status)}" update=":adminForm:growl" />
+                                    </p:selectOneMenu>
+                                </p:column>
+                            </p:dataTable>
+                        </div>
+                    </p:tab>
 
-                            <!-- Eye — view details -->
-                            <p:commandButton icon="pi pi-eye" title="View Details"
-                                             styleClass="ui-button-secondary rounded-button"
-                                             actionListener="#{adminBean.selectProduct(p)}"
-                                             update=":adminForm:productDetailDialog"
-                                             oncomplete="PF('productDetailDlg').show(); setTimeout(function(){ var el = document.querySelector('#adminForm\\:productDetailContent .tile-carousel'); if(el) rebuildCarousels(); }, 300);" />
-                        </p:column>
-                    </p:dataTable>
-                </div>
+                    <!-- Tab 3: Return Requests -->
+                    <p:tab title="Return Requests">
+                        <div class="p-3">
+                            <p:dataTable id="returnsTable" value="#{adminBean.returnRequests}" var="r"
+                                         paginator="true" rows="15" paginatorPosition="bottom"
+                                         emptyMessage="No return requests found."
+                                         styleClass="ui-datatable-striped shadow-1">
+                                
+                                <p:column headerText="Return ID" width="90" sortBy="#{r.returnid}">
+                                    <span class="font-bold">##{r.returnid}</span>
+                                </p:column>
+                                
+                                <p:column headerText="Order &amp; Product">
+                                    <span class="text-xs text-gray-400 block">Order ##{r.orderdetailid.orderid.orderid}</span>
+                                    <span class="font-semibold text-gray-800 block">#{r.orderdetailid.productid.title}</span>
+                                    <span class="text-xs text-gray-500">Qty: #{r.orderdetailid.quantity} × ₹#{r.orderdetailid.price}</span>
+                                </p:column>
+                                
+                                <p:column headerText="Buyer">
+                                    <span class="text-sm font-semibold text-gray-800">#{r.orderdetailid.orderid.buyerid.username}</span>
+                                </p:column>
+                                
+                                <p:column headerText="Reason">
+                                    <span class="text-xs text-gray-600">#{r.reason}</span>
+                                </p:column>
+                                
+                                <p:column headerText="Requested At">
+                                    <h:outputText value="#{r.requestedAt}">
+                                        <f:convertDateTime pattern="dd MMM yyyy HH:mm" />
+                                    </h:outputText>
+                                </p:column>
+                                
+                                <p:column headerText="Status" width="120" style="text-align:center">
+                                    <span class="px-2 py-1 border-round text-xs font-bold uppercase
+                                          #{r.status == 'Requested' ? 'bg-orange-100 text-orange-700' :
+                                            r.status == 'Approved' ? 'bg-green-100 text-green-700' :
+                                            r.status == 'Rejected' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}">
+                                        #{r.status}
+                                    </span>
+                                </p:column>
+                                
+                                <p:column headerText="Actions" width="150" style="text-align:center">
+                                    <h:panelGroup rendered="#{r.status eq 'Requested'}">
+                                        <p:commandButton icon="pi pi-check" title="Approve Return"
+                                                         actionListener="#{adminBean.approveReturn(r.returnid)}"
+                                                         styleClass="ui-button-success rounded-button mr-1"
+                                                         update=":adminForm" />
+                                        <p:commandButton icon="pi pi-times" title="Reject Return"
+                                                         actionListener="#{adminBean.rejectReturn(r.returnid)}"
+                                                         styleClass="ui-button-danger rounded-button"
+                                                         update=":adminForm" />
+                                    </h:panelGroup>
+                                    <h:outputText value="Processed" rendered="#{r.status ne 'Requested'}" styleClass="text-xs text-gray-400" />
+                                </p:column>
+                            </p:dataTable>
+                        </div>
+                    </p:tab>
+
+                    <!-- Tab 4: Refunds -->
+                    <p:tab title="Refunds">
+                        <div class="p-3">
+                            <p:dataTable id="refundsTable" value="#{adminBean.refunds}" var="ref"
+                                         paginator="true" rows="15" paginatorPosition="bottom"
+                                         emptyMessage="No refunds found."
+                                         styleClass="ui-datatable-striped shadow-1">
+                                
+                                <p:column headerText="Refund ID" width="100" sortBy="#{ref.refundid}">
+                                    <span class="font-bold">##{ref.refundid}</span>
+                                </p:column>
+                                
+                                <p:column headerText="Return ID" width="100">
+                                    <span class="font-semibold">##{ref.returnid.returnid}</span>
+                                </p:column>
+                                
+                                <p:column headerText="Buyer">
+                                    <span class="text-sm font-semibold text-gray-800">#{ref.returnid.orderdetailid.orderid.buyerid.username}</span>
+                                </p:column>
+                                
+                                <p:column headerText="Refund Amount" sortBy="#{ref.amount}">
+                                    <span class="font-bold text-green-700">₹#{ref.amount}</span>
+                                </p:column>
+                                
+                                <p:column headerText="Refund Status" width="120" style="text-align:center" sortBy="#{ref.status}">
+                                    <span class="px-2 py-1 border-round text-xs font-bold uppercase
+                                          #{ref.status == 'Pending' ? 'bg-orange-100 text-orange-700' :
+                                            ref.status == 'Processed' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                                        #{ref.status}
+                                    </span>
+                                </p:column>
+                                
+                                <p:column headerText="Processed At">
+                                    <h:outputText value="#{ref.processedAt}">
+                                        <f:convertDateTime pattern="dd MMM yyyy HH:mm" />
+                                    </h:outputText>
+                                </p:column>
+                                
+                                <p:column headerText="Action" width="150" style="text-align:center">
+                                    <p:commandButton value="Process Refund" icon="pi pi-wallet"
+                                                     rendered="#{ref.status eq 'Pending'}"
+                                                     actionListener="#{adminBean.processRefund(ref.refundid)}"
+                                                     styleClass="ui-button-success"
+                                                     update=":adminForm" />
+                                    <h:outputText value="Processed" rendered="#{ref.status ne 'Pending'}" styleClass="text-xs text-gray-400" />
+                                </p:column>
+                            </p:dataTable>
+                        </div>
+                    </p:tab>
+                </p:tabView>
             </div>
 
             <!-- ===== Product Detail Dialog ===== -->

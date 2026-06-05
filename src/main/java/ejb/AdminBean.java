@@ -1,17 +1,10 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/J2EE/EJB40/StatelessEjbClass.java to edit this template
- */
 package ejb;
 
-import entities.Products;
-import entities.Refunds;
-import entities.ReturnRequests;
-import entities.Users;
+import entities.*;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.*;
-
+import java.util.List;
 
 /**
  *
@@ -38,21 +31,68 @@ public class AdminBean implements AdminBeanLocal {
     // process return
     public void handleReturn(int returnId, boolean approve){
         ReturnRequests r = em.find(ReturnRequests.class, returnId);
-        r.setStatus(approve ? "Approved" : "Rejected");
+        if (r != null) {
+            r.setStatus(approve ? "Approved" : "Rejected");
+            if (approve) {
+                // Check if a refund already exists to avoid duplicates
+                boolean refundExists = false;
+                if (r.getRefundsCollection() != null) {
+                    for (Refunds ref : r.getRefundsCollection()) {
+                        if (!"Failed".equals(ref.getStatus())) {
+                            refundExists = true;
+                            break;
+                        }
+                    }
+                }
+                if (!refundExists) {
+                    Refunds refund = new Refunds();
+                    refund.setReturnid(r);
+                    double amount = 0;
+                    if (r.getOrderdetailid() != null) {
+                        amount = r.getOrderdetailid().getPrice() * r.getOrderdetailid().getQuantity();
+                    }
+                    refund.setAmount(amount);
+                    refund.setStatus("Pending");
+                    refund.setProcessedAt(new java.util.Date());
+                    em.persist(refund);
+                }
+            }
+        }
     }
 
     // process refund
     public void processRefunds(int refundId){
         Refunds ref = em.find(Refunds.class, refundId);
-        ref.setStatus("Processed");
+        if (ref != null) {
+            ref.setStatus("Processed");
+            ref.setProcessedAt(new java.util.Date());
+            if (ref.getReturnid() != null) {
+                ref.getReturnid().setStatus("Completed");
+            }
+        }
     }
 
-    // disable user
-//    public void disableUser(int userId){
-//        Users u = em.find(Users.class, userId);
-//        u.setActive(false);
-//    }
+    @Override
+    public List<ReturnRequests> getAllReturnRequests() {
+        return em.createQuery("SELECT r FROM ReturnRequests r ORDER BY r.returnid DESC", ReturnRequests.class).getResultList();
+    }
 
-    // Add business logic below. (Right-click in editor and choose
-    // "Insert Code > Add Business Method")
+    @Override
+    public List<Refunds> getAllRefunds() {
+        return em.createQuery("SELECT r FROM Refunds r ORDER BY r.refundid DESC", Refunds.class).getResultList();
+    }
+
+    @Override
+    public List<Orders> getAllOrders() {
+        return em.createQuery("SELECT DISTINCT o FROM Orders o LEFT JOIN FETCH o.orderDetailsCollection LEFT JOIN FETCH o.paymentsCollection ORDER BY o.orderid DESC", Orders.class).getResultList();
+    }
+
+    @Override
+    public void updateOrderStatus(int orderId, String status) {
+        Orders o = em.find(Orders.class, orderId);
+        if (o != null) {
+            o.setStatus(status);
+            em.merge(o);
+        }
+    }
 }

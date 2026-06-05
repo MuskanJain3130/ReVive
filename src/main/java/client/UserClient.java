@@ -12,11 +12,29 @@ public class UserClient {
 
     private WebTarget webTarget;
     private Client client;
-    private static final String BASE_URI = "http://localhost:8084/ReVive/api";
+
+    private static String getBaseUri() {
+        try {
+            jakarta.faces.context.FacesContext facesContext = jakarta.faces.context.FacesContext.getCurrentInstance();
+            if (facesContext != null) {
+                jakarta.servlet.http.HttpServletRequest request = (jakarta.servlet.http.HttpServletRequest) facesContext.getExternalContext().getRequest();
+                if (request != null) {
+                    String scheme = request.getScheme();
+                    String serverName = request.getServerName();
+                    int port = request.getServerPort();
+                    String contextPath = request.getContextPath();
+                    return scheme + "://" + serverName + ":" + port + contextPath + "/api";
+                }
+            }
+        } catch (Exception e) {
+            // Fallback
+        }
+        return "http://localhost:8085/ReVive/api";
+    }
 
     public UserClient() {
         client = jakarta.ws.rs.client.ClientBuilder.newClient();
-        webTarget = client.target(BASE_URI).path("user");
+        webTarget = client.target(getBaseUri()).path("user");
     }
 
     public Response requestReturn(entities.ReturnRequests r) throws ClientErrorException {

@@ -108,7 +108,9 @@ public class CheckoutBean implements Serializable {
 
     public void saveNewAddress() {
         try {
-            newAddress.setIsDefault(false); // Can be enhanced later
+            if (newAddress.getIsDefault() == null) {
+                newAddress.setIsDefault(false);
+            }
             userBean.addAddress(newAddress, authBean.getCurrentUser().getUserid());
             
             // Reload and select the new address
@@ -203,6 +205,16 @@ public class CheckoutBean implements Serializable {
 
             userBean.processCheckout(newOrder, detailsList, payment);
 
+            // Send confirmation email asynchronously
+            if (authBean.getCurrentUser() != null && authBean.getCurrentUser().getEmail() != null) {
+                sendEmailNotification(authBean.getCurrentUser().getEmail(), String.valueOf(newOrder.getOrderid()), totalAmount);
+            }
+
+            // Send confirmation SMS
+            if (authBean.getCurrentUser() != null && authBean.getCurrentUser().getPhone() != null && !authBean.getCurrentUser().getPhone().trim().isEmpty()) {
+                sendSmsNotification(authBean.getCurrentUser().getPhone(), String.valueOf(newOrder.getOrderid()), totalAmount);
+            }
+
             // Clear the local cart via JS on the next page
             return "success?faces-redirect=true";
 
@@ -210,6 +222,77 @@ public class CheckoutBean implements Serializable {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Checkout Failed", e.getMessage()));
             return null;
         }
+    }
+
+    private void sendEmailNotification(String toEmail, String orderId, double totalAmount) {
+        System.out.println("[ReVive Mail] Sending order confirmation email to: " + toEmail);
+        try {
+            java.util.Properties props = new java.util.Properties();
+            props.put("mail.smtp.host", "localhost");
+            props.put("mail.smtp.port", "25");
+            
+            jakarta.mail.Session mailSession = jakarta.mail.Session.getInstance(props, null);
+            jakarta.mail.internet.MimeMessage message = new jakarta.mail.internet.MimeMessage(mailSession);
+            message.setFrom(new jakarta.mail.internet.InternetAddress("noreply@revive.com", "ReVive Marketplace"));
+            message.addRecipient(jakarta.mail.Message.RecipientType.TO, new jakarta.mail.internet.InternetAddress(toEmail));
+            message.setSubject("Order Confirmation - ReVive", "UTF-8");
+            
+            String htmlContent = "<h3>Dear Customer,</h3>" +
+                    "<p>Thank you for shopping with ReVive Marketplace!</p>" +
+                    "<p>Your order <strong>#" + orderId + "</strong> has been successfully placed via <strong>Cash on Delivery (COD)</strong>.</p>" +
+                    "<p><strong>Total Amount to be Paid:</strong> INR " + totalAmount + "</p>" +
+                    "<p>We will pack and ship your items shortly.</p>" +
+                    "<br/>" +
+                    "<p>Best regards,<br/>ReVive Team</p>";
+            
+            message.setContent(htmlContent, "text/html; charset=utf-8");
+            
+            // Print beautiful simulated email box to the console for testing
+            System.out.println("\n+-----------------------------------------------------------------------+");
+            System.out.println("|                     [SIMULATED EMAIL NOTIFICATION]                     |");
+            System.out.println("+-----------------------------------------------------------------------+");
+            System.out.println("| From:    noreply@revive.com (ReVive Marketplace)                      |");
+            System.out.println("| To:      " + String.format("%-60s", toEmail) + " |");
+            System.out.println("| Subject: Order Confirmation - ReVive                                  |");
+            System.out.println("+-----------------------------------------------------------------------+");
+            System.out.println("| Body (HTML):                                                          |");
+            for (String line : htmlContent.split("<br/>|</p>|<h3>|</h3>")) {
+                String cleanLine = line.replaceAll("<[^>]*>", "").trim();
+                if (!cleanLine.isEmpty()) {
+                    System.out.println("|   " + String.format("%-67s", cleanLine) + " |");
+                }
+            }
+            System.out.println("+-----------------------------------------------------------------------+\n");
+
+            new Thread(() -> {
+                try {
+                    jakarta.mail.Transport.send(message);
+                    System.out.println("[ReVive Mail] Email sent successfully to " + toEmail);
+                } catch (Exception e) {
+                    System.out.println("[ReVive Mail] SMTP delivery failed (this is expected if local SMTP server is not running). Details: " + e.getMessage());
+                }
+            }).start();
+            
+        } catch (Exception e) {
+            System.out.println("[ReVive Mail] Error creating email: " + e.getMessage());
+        }
+    }
+
+    private void sendSmsNotification(String phoneNumber, String orderId, double totalAmount) {
+        System.out.println("[ReVive SMS] Sending order confirmation SMS to: " + phoneNumber);
+        System.out.println("\n+-----------------------------------------------------------------------+");
+        System.out.println("|                      [SIMULATED SMS NOTIFICATION]                      |");
+        System.out.println("+-----------------------------------------------------------------------+");
+        System.out.println("| To:      " + String.format("%-60s", phoneNumber) + " |");
+        System.out.println("+-----------------------------------------------------------------------+");
+        System.out.println("| Message:                                                              |");
+        String msg = "Dear Customer, thank you for shopping with ReVive! Your order #" + orderId + " has been successfully placed via COD. Total Amount: INR " + totalAmount + ". We will pack and ship your items shortly.";
+        int len = msg.length();
+        for (int i = 0; i < len; i += 65) {
+            String line = msg.substring(i, Math.min(i + 65, len));
+            System.out.println("|   " + String.format("%-67s", line) + " |");
+        }
+        System.out.println("+-----------------------------------------------------------------------+\n");
     }
 
     public void toggleAddressForm() {

@@ -100,9 +100,17 @@ public class ProductManagedBean implements Serializable {
                         String ext = file.getFileName().substring(file.getFileName().lastIndexOf("."));
                         String newFileName = UUID.randomUUID().toString() + ext;
 
-                        // Hardcoded path to the webapp images directory
-                        String path = "D:\\ReVive\\src\\main\\webapp\\images";
-                        System.out.println("[ReVive] Using hardcoded images path: " + path);
+                        // Resolve the deployed web application's images path dynamically
+                        String path = jakarta.faces.context.FacesContext.getCurrentInstance()
+                                .getExternalContext()
+                                .getRealPath("/images");
+                        System.out.println("[ReVive] Dynamic real path for /images: " + path);
+
+                        if (path == null) {
+                            // Fallback to hardcoded workspace path if real path is not available
+                            path = "d:\\Code\\ReVive_Java_Project\\ReVive\\src\\main\\webapp\\images";
+                            System.out.println("[ReVive] Real path is null, falling back to: " + path);
+                        }
 
                         File folder = new File(path);
                         if (!folder.exists()) {
@@ -119,7 +127,34 @@ public class ProductManagedBean implements Serializable {
                                 output.write(buffer, 0, length);
                             }
                         }
-                        System.out.println("[ReVive] Saved file to: " + savedFile.getAbsolutePath() + " exists=" + savedFile.exists() + " size=" + savedFile.length());
+                        System.out.println("[ReVive] Saved file to deployed dir: " + savedFile.getAbsolutePath() + " exists=" + savedFile.exists() + " size=" + savedFile.length());
+
+                        // Try to duplicate the file in the workspace source directory so it persists across cleans/rebuilds
+                        try {
+                            File realPathDir = new File(path);
+                            File parent = realPathDir.getParentFile();
+                            if (parent != null) {
+                                File grandParent = parent.getParentFile();
+                                if (grandParent != null) {
+                                    File projectRoot = grandParent.getParentFile();
+                                    if (projectRoot != null) {
+                                        File srcImagesDir = new File(projectRoot, "src/main/webapp/images");
+                                        if (!srcImagesDir.exists() || !srcImagesDir.isDirectory()) {
+                                            // Fallback to local workspace layout
+                                            srcImagesDir = new File("d:\\Code\\ReVive_Java_Project\\ReVive\\src\\main\\webapp\\images");
+                                        }
+                                        if (srcImagesDir.exists() && srcImagesDir.isDirectory()) {
+                                            File srcSavedFile = new File(srcImagesDir, newFileName);
+                                            java.nio.file.Files.copy(savedFile.toPath(), srcSavedFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                                            System.out.println("[ReVive] Saved duplicate to source dir: " + srcSavedFile.getAbsolutePath());
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            System.out.println("[ReVive] Could not write duplicate copy to source directory: " + e.getMessage());
+                        }
+
                         savedNames.add(newFileName);
                         count++;
                     } catch (Exception e) {

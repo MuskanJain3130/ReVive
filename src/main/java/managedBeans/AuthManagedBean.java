@@ -15,6 +15,7 @@ import jakarta.security.enterprise.credential.UsernamePasswordCredential;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.Serializable;
+import java.util.Date;
 
 @Named("authBean")
 @SessionScoped
@@ -99,6 +100,7 @@ public class AuthManagedBean implements Serializable {
             return null;
         }
         try {
+            newUser.setCreatedAt(new Date());
             userClient.registerUser(newUser, selectedRoleId);
             facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Registration Successful", "You can now log in."));
             newUser = new Users(); // Reset
@@ -106,9 +108,18 @@ public class AuthManagedBean implements Serializable {
             otpVerified = false;
             return "login?faces-redirect=true";
         } catch (Exception e) {
-            facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Registration Failed", e.getMessage()));
-            return null;
-        }
+    e.printStackTrace();
+
+    facesContext.addMessage(null,
+        new FacesMessage(
+            FacesMessage.SEVERITY_ERROR,
+            "Registration Failed",
+            e.toString()
+        )
+    );
+
+    return null;
+}
     }
 
     private AuthenticationStatus authenticate() {

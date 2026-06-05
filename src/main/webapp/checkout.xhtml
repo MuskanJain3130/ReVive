@@ -24,14 +24,6 @@
                 if (f1) f1.value = cart;
                 if (f2) f2.value = cart;
             }
-
-            document.addEventListener('DOMContentLoaded', function() {
-                syncCartData();
-                var cartField = document.getElementById('cartJsonField');
-                if (!cartField || !cartField.value || cartField.value.trim() === '' || cartField.value === '[]') {
-                    document.getElementById('hiddenSubmitBtn').click();
-                }
-            });
             
             function launchRazorpay(orderId, keyId, amountInSubunits, username, email) {
                 var options = {
@@ -63,14 +55,23 @@
             <div class="col-12 md:col-10 lg:col-8">
                 
                 <h:panelGroup id="checkoutContainer" layout="block">
-                    <!-- Hidden Sync Form -->
-                    <h:form prependId="false">
-                        <h:inputHidden id="cartJsonField" value="#{checkoutBean.cartJson}" />
-                        <p:commandButton id="hiddenSubmitBtn" style="display:none" action="#{checkoutBean.parseCart}" update="checkoutContainer" />
-                    </h:form>
-
                     <!-- Empty Cart Protection -->
                     <h:panelGroup rendered="#{empty checkoutBean.parsedCartItems}">
+                        <script>
+                            //<![CDATA[
+                            document.addEventListener('DOMContentLoaded', function() {
+                                var cart = localStorage.getItem('revive_cart') || '[]';
+                                if (cart !== '[]' && cart !== '') {
+                                    var cartField = document.getElementById('cartJsonField');
+                                    if (cartField) {
+                                        cartField.value = cart;
+                                        var btn = document.getElementById('hiddenSubmitBtn');
+                                        if (btn) btn.click();
+                                    }
+                                }
+                            });
+                            //]]>
+                        </script>
                         <div class="p-5 border-round-2xl bg-white shadow-4 text-center">
                             <i class="bi bi-cart-x text-6xl text-gray-300 block mb-3"></i>
                             <h2 class="text-xl font-bold mb-3">Your Cart is Empty</h2>

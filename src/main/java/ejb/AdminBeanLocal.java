@@ -1,10 +1,10 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/J2EE/EJB40/SessionLocal.java to edit this template
- */
 package ejb;
 
+import entities.Refunds;
+import entities.ReturnRequests;
+import entities.Orders;
 import jakarta.ejb.Local;
+import java.util.List;
 
 /**
  *
@@ -17,4 +17,8 @@ public interface AdminBeanLocal {
     public void handleReturn(int returnId, boolean approve);
     public void processRefunds(int refundId);
     
+    public List<ReturnRequests> getAllReturnRequests();
+    public List<Refunds> getAllRefunds();
+    public List<Orders> getAllOrders();
+    public void updateOrderStatus(int orderId, String status);
 }

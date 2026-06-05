@@ -64,4 +64,60 @@ public class ProfileBean implements Serializable {
     private Orders selectedOrder;
     public Orders getSelectedOrder() { return selectedOrder; }
     public void setSelectedOrder(Orders selectedOrder) { this.selectedOrder = selectedOrder; }
+    
+    private OrderDetails selectedDetail;
+    private String returnReason;
+
+    public void selectDetailForReturn(OrderDetails detail) {
+        this.selectedDetail = detail;
+        this.returnReason = "";
+    }
+
+    public void submitReturnRequest() {
+        if (selectedDetail == null) {
+            FacesContext.getCurrentInstance().addMessage(null, 
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "No product selected for return."));
+            return;
+        }
+        if (returnReason == null || returnReason.trim().isEmpty()) {
+            FacesContext.getCurrentInstance().addMessage(null, 
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Please provide a reason for return."));
+            return;
+        }
+        try {
+            entities.ReturnRequests rr = new entities.ReturnRequests();
+            rr.setOrderdetailid(selectedDetail);
+            rr.setReason(returnReason);
+            rr.setStatus("Requested");
+            rr.setRequestedAt(new java.util.Date());
+            
+            userBean.requestReturn(rr);
+            
+            // Reload activities
+            loadActivity();
+            
+            // Re-sync selectedOrder if present to update the details modal immediately
+            if (selectedOrder != null) {
+                for (Orders o : myOrders) {
+                    if (o.getOrderid().equals(selectedOrder.getOrderid())) {
+                        selectedOrder = o;
+                        break;
+                    }
+                }
+            }
+            
+            FacesContext.getCurrentInstance().addMessage(null, 
+                new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", "Return request submitted successfully."));
+            
+            org.primefaces.PrimeFaces.current().executeScript("PF('returnDialog').hide();");
+        } catch (Exception e) {
+            FacesContext.getCurrentInstance().addMessage(null, 
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Failed to submit return request: " + e.getMessage()));
+        }
+    }
+
+    public OrderDetails getSelectedDetail() { return selectedDetail; }
+    public void setSelectedDetail(OrderDetails selectedDetail) { this.selectedDetail = selectedDetail; }
+    public String getReturnReason() { return returnReason; }
+    public void setReturnReason(String returnReason) { this.returnReason = returnReason; }
 }

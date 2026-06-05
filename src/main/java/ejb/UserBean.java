@@ -100,7 +100,19 @@ public class UserBean implements UserBeanLocal {
         if (r.getRequestedAt() == null) {
             r.setRequestedAt(new Date());
         }
-        em.persist(r);
+        if (r.getOrderdetailid() != null) {
+            OrderDetails od = em.find(OrderDetails.class, r.getOrderdetailid().getOrderdetailid());
+            r.setOrderdetailid(od);
+            em.persist(r);
+            if (od != null) {
+                if (od.getReturnRequestsCollection() == null) {
+                    od.setReturnRequestsCollection(new java.util.ArrayList<>());
+                }
+                od.getReturnRequestsCollection().add(r);
+            }
+        } else {
+            em.persist(r);
+        }
     }
 
     @Override
@@ -218,6 +230,12 @@ public class UserBean implements UserBeanLocal {
         }
         payment.setOrderid(order);
         em.persist(payment);
+
+        // Synchronize collections in memory to update the L1 cache
+        order.setOrderDetailsCollection(details);
+        List<Payments> pColl = new java.util.ArrayList<>();
+        pColl.add(payment);
+        order.setPaymentsCollection(pColl);
     }
 
     @Override

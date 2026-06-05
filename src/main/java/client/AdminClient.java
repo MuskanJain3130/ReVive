@@ -20,11 +20,29 @@ public class AdminClient {
 
     private jakarta.ws.rs.client.WebTarget webTarget;
     private jakarta.ws.rs.client.Client client;
-    private static final String BASE_URI = "http://localhost:8084/ReVive/api";
+
+    private static String getBaseUri() {
+        try {
+            jakarta.faces.context.FacesContext facesContext = jakarta.faces.context.FacesContext.getCurrentInstance();
+            if (facesContext != null) {
+                jakarta.servlet.http.HttpServletRequest request = (jakarta.servlet.http.HttpServletRequest) facesContext.getExternalContext().getRequest();
+                if (request != null) {
+                    String scheme = request.getScheme();
+                    String serverName = request.getServerName();
+                    int port = request.getServerPort();
+                    String contextPath = request.getContextPath();
+                    return scheme + "://" + serverName + ":" + port + contextPath + "/api";
+                }
+            }
+        } catch (Exception e) {
+            // Fallback
+        }
+        return "http://localhost:8085/ReVive/api";
+    }
 
     public AdminClient() {
         client = jakarta.ws.rs.client.ClientBuilder.newClient();
-        webTarget = client.target(BASE_URI).path("admin");
+        webTarget = client.target(getBaseUri()).path("admin");
     }
 
     public jakarta.ws.rs.core.Response approveProduct(String productId) throws jakarta.ws.rs.ClientErrorException {
