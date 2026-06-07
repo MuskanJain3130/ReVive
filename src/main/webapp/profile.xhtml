@@ -144,7 +144,7 @@
 
         <!-- Order Detail Dialog -->
         <p:dialog id="orderDetailDialog" header="Order Details ##{profileBean.selectedOrder.orderid}" 
-                  widgetVar="orderDialog" modal="true" width="600" responsive="true" showEffect="fade" 
+                  widgetVar="orderDialog" modal="true" width="600" height="500" fitViewport="true" responsive="true" showEffect="fade" 
                   hideEffect="fade" styleClass="order-dialog">
             
             <h:form id="orderDetailForm">
@@ -197,7 +197,7 @@
     
                     <div class="mb-4">
                         <h3 class="text-xs font-bold uppercase text-gray-400 mb-2 tracking-wider">Items Ordered</h3>
-                        <div class="max-h-20rem overflow-auto">
+                        <div style="max-height: 20rem; overflow-y: auto; padding-right: 8px;">
                             <ui:repeat value="#{profileBean.selectedOrder.orderDetailsCollection}" var="detail">
                                 <div class="flex align-items-center justify-content-between py-3 border-bottom-1 border-gray-100">
                                     <div class="flex align-items-center">

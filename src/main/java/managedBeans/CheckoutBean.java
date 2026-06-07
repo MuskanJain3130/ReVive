@@ -51,8 +51,8 @@ public class CheckoutBean implements Serializable {
 
     // Razorpay Integration
     private String razorpayOrderId;
-    private String razorpayKeyId = "YOUR_KEY_ID"; // Replace with actual Key ID
-    private String razorpayKeySecret = "YOUR_KEY_SECRET"; // Replace with actual Key Secret
+    private String razorpayKeyId = util.SmsService.getEnv("RAZORPAY_KEY_ID");
+    private String razorpayKeySecret = util.SmsService.getEnv("RAZORPAY_KEY_SECRET");
     
     private String paymentMethod = "online"; // "online" or "cod"
 
@@ -279,20 +279,44 @@ public class CheckoutBean implements Serializable {
     }
 
     private void sendSmsNotification(String phoneNumber, String orderId, double totalAmount) {
-        System.out.println("[ReVive SMS] Sending order confirmation SMS to: " + phoneNumber);
-        System.out.println("\n+-----------------------------------------------------------------------+");
-        System.out.println("|                      [SIMULATED SMS NOTIFICATION]                      |");
-        System.out.println("+-----------------------------------------------------------------------+");
-        System.out.println("| To:      " + String.format("%-60s", phoneNumber) + " |");
-        System.out.println("+-----------------------------------------------------------------------+");
-        System.out.println("| Message:                                                              |");
-        String msg = "Dear Customer, thank you for shopping with ReVive! Your order #" + orderId + " has been successfully placed via COD. Total Amount: INR " + totalAmount + ". We will pack and ship your items shortly.";
-        int len = msg.length();
-        for (int i = 0; i < len; i += 65) {
-            String line = msg.substring(i, Math.min(i + 65, len));
-            System.out.println("|   " + String.format("%-67s", line) + " |");
+        StringBuilder invoice = new StringBuilder();
+        invoice.append("🛍️ *ReVive Marketplace* 🛍️\n");
+        invoice.append("*Invoice for Order #").append(orderId).append("*\n\n");
+
+        String customerName = authBean.getCurrentUser().getUsername();
+        Addresses selectedAddress = null;
+        if (userAddresses != null) {
+            for (Addresses a : userAddresses) {
+                if (a.getAddressid().equals(selectedAddressId)) {
+                    selectedAddress = a;
+                    break;
+                }
+            }
         }
-        System.out.println("+-----------------------------------------------------------------------+\n");
+
+        invoice.append("👤 *Customer:* ").append(customerName).append("\n");
+        if (selectedAddress != null) {
+            invoice.append("📍 *Delivery Address:* ").append(selectedAddress.getStreet())
+                   .append(", ").append(selectedAddress.getCity())
+                   .append(" - ").append(selectedAddress.getZipcode()).append("\n\n");
+        } else {
+            invoice.append("\n");
+        }
+
+        invoice.append("📦 *Order Details:*\n");
+        if (parsedCartItems != null) {
+            for (CartItem ci : parsedCartItems) {
+                invoice.append("- ").append(ci.getQuantity()).append("x ").append(ci.getTitle())
+                       .append(" (INR ").append(ci.getPrice()).append(")\n");
+            }
+        }
+
+        String paymentStr = "online".equals(paymentMethod) ? "Razorpay (Paid)" : "Cash on Delivery (COD)";
+        invoice.append("\n💳 *Payment Mode:* ").append(paymentStr).append("\n");
+        invoice.append("💰 *Total Amount:* *INR ").append(totalAmount).append("*\n\n");
+        invoice.append("Thank you for shopping sustainably with ReVive! ♻️");
+
+        util.SmsService.sendWhatsApp(phoneNumber, invoice.toString());
     }
 
     public void toggleAddressForm() {

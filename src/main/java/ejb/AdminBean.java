@@ -68,6 +68,14 @@ public class AdminBean implements AdminBeanLocal {
             ref.setProcessedAt(new java.util.Date());
             if (ref.getReturnid() != null) {
                 ref.getReturnid().setStatus("Completed");
+                
+                // Restock the returned product
+                OrderDetails od = ref.getReturnid().getOrderdetailid();
+                if (od != null && od.getProductid() != null) {
+                    Products p = od.getProductid();
+                    p.setQuantity(p.getQuantity() + od.getQuantity());
+                    em.merge(p);
+                }
             }
         }
     }
@@ -91,6 +99,19 @@ public class AdminBean implements AdminBeanLocal {
     public void updateOrderStatus(int orderId, String status) {
         Orders o = em.find(Orders.class, orderId);
         if (o != null) {
+            // If the order is being cancelled, restore the stock
+            if ("Cancelled".equalsIgnoreCase(status) && !"Cancelled".equalsIgnoreCase(o.getStatus())) {
+                if (o.getOrderDetailsCollection() != null) {
+                    for (OrderDetails od : o.getOrderDetailsCollection()) {
+                        if (od.getProductid() != null) {
+                            Products p = od.getProductid();
+                            p.setQuantity(p.getQuantity() + od.getQuantity());
+                            em.merge(p);
+                        }
+                    }
+                }
+            }
+            
             o.setStatus(status);
             em.merge(o);
         }

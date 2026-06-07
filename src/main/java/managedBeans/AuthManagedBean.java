@@ -35,7 +35,7 @@ public class AuthManagedBean implements Serializable {
     private Users newUser = new Users();
     private String username;
     private String password;
-    private String selectedRoleId = "2"; // Default to User
+    private String selectedRoleId = "2"; // Default to User (Buyer)
     private boolean loggedIn = false;
     
     // OTP Fields
@@ -77,12 +77,15 @@ public class AuthManagedBean implements Serializable {
         generatedOtp = String.valueOf((int) (Math.random() * 900000) + 100000);
         otpSent = true;
         
-        // Mock print to console
-        System.out.println("========================================");
-        System.out.println("[ReVive OTP] Your verification code is: " + generatedOtp);
-        System.out.println("========================================");
+        // Actually send the SMS to the phone number
+        sendRealSms(newUser.getPhone(), generatedOtp);
         
-        facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "OTP Sent", "A mock verification code has been printed to the server log."));
+        facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "OTP Sent", "The OTP has been sent to your phone number."));
+    }
+
+    private void sendRealSms(String phone, String otp) {
+        String message = "Your ReVive verification code is: " + otp;
+        util.SmsService.sendSms(phone, message);
     }
 
     public void verifyOtp() {
@@ -99,7 +102,19 @@ public class AuthManagedBean implements Serializable {
             facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Please verify your phone number first."));
             return null;
         }
+        
         try {
+            // Check if username already exists
+            try {
+                entities.Users existingUser = userClient.getUserByUsername(entities.Users.class, newUser.getUsername());
+                if (existingUser != null && existingUser.getUsername() != null) {
+                    facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Username Taken", "This username already exists. Please choose a unique username for login."));
+                    return null;
+                }
+            } catch (Exception ex) {
+                // Ignore exception if user is not found (which means username is available)
+            }
+
             newUser.setCreatedAt(new Date());
             userClient.registerUser(newUser, selectedRoleId);
             facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Registration Successful", "You can now log in."));
@@ -108,18 +123,18 @@ public class AuthManagedBean implements Serializable {
             otpVerified = false;
             return "login?faces-redirect=true";
         } catch (Exception e) {
-    e.printStackTrace();
+            e.printStackTrace();
 
-    facesContext.addMessage(null,
-        new FacesMessage(
-            FacesMessage.SEVERITY_ERROR,
-            "Registration Failed",
-            e.toString()
-        )
-    );
+            facesContext.addMessage(null,
+                new FacesMessage(
+                    FacesMessage.SEVERITY_ERROR,
+                    "Registration Failed",
+                    e.toString()
+                )
+            );
 
-    return null;
-}
+            return null;
+        }
     }
 
     private AuthenticationStatus authenticate() {
@@ -156,9 +171,7 @@ public class AuthManagedBean implements Serializable {
     }
 
     public boolean isSeller() {
-        return currentUser != null
-            && currentUser.getRoleid() != null
-            && Integer.valueOf(3).equals(currentUser.getRoleid().getRoleid());
+        return isUser(); // Buyers and Sellers both use Role 2
     }
 
     public boolean isBuyer() {

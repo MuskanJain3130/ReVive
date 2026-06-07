@@ -231,7 +231,9 @@
                         <div class="pd-price">₹#{productDetailBean.product.price}</div>
                         
                         <ul class="pd-meta">
-                            <li><strong>Condition:</strong> <span>#{productDetailBean.product.productCondition}</span></li>
+                            <ui:fragment rendered="#{not empty productDetailBean.product.productCondition}">
+                                <li><strong>Condition:</strong> <span>#{productDetailBean.product.productCondition}</span></li>
+                            </ui:fragment>
                             <li><strong>Sold By:</strong> <span>#{productDetailBean.product.sellerid.username}</span></li>
                             <li><strong>Available Qty:</strong> <span>#{productDetailBean.product.quantity}</span></li>
                         </ul>
@@ -311,8 +313,8 @@
                                     <p:messages id="reviewMsg" showDetail="true" closable="true" />
                                     
                                     <div style="margin-bottom:12px;">
-                                        <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Rating (1-5)</label>
-                                        <p:spinner value="#{productDetailBean.newReview.rating}" min="1" max="5" required="true" />
+                                        <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Rating</label>
+                                        <p:rating value="#{productDetailBean.newReview.rating}" stars="5" required="true" />
                                     </div>
                                     <div style="margin-bottom:16px;">
                                         <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Comment</label>

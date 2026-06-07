@@ -171,6 +171,23 @@ public class AdminManagedBean implements Serializable {
         return Arrays.asList(selectedProduct.getImageUrl().split(";"));
     }
 
+    // Statistics getters
+    public long getTotalProductsCount() {
+        return allProducts != null ? allProducts.size() : 0;
+    }
+
+    public long getApprovedProductsCount() {
+        return allProducts != null ? allProducts.stream().filter(p -> "Approved".equals(p.getApprovalStatus())).count() : 0;
+    }
+
+    public long getPendingProductsCount() {
+        return allProducts != null ? allProducts.stream().filter(p -> "Pending".equals(p.getApprovalStatus())).count() : 0;
+    }
+
+    public long getRejectedProductsCount() {
+        return allProducts != null ? allProducts.stream().filter(p -> "Rejected".equals(p.getApprovalStatus())).count() : 0;
+    }
+
     // Getters / setters
     public List<Products> getAllProducts() { return allProducts; }
     public List<Products> getFilteredProducts() { return filteredProducts; }

@@ -174,9 +174,11 @@
                                 <h:link outcome="product.xhtml" style="display:block; text-decoration:none; color:inherit;">
                                     <f:param name="id" value="#{product.productid}" />
                                     <!-- Condition Badge -->
+                                <h:panelGroup rendered="#{not empty product.productCondition}">
                                     <span class="tile-badge #{product.productCondition eq 'New' ? 'new' : (product.productCondition eq 'Like New' ? 'like-new' : (product.productCondition eq 'Good' ? 'good' : (product.productCondition eq 'Fair' ? 'fair' : 'poor')))}">
                                         #{product.productCondition}
                                     </span>
+                                </h:panelGroup>
 
                                     <!-- Image Carousel -->
                                     <div class="tile-carousel" data-images="#{product.imageUrl}" data-title="#{product.title}">

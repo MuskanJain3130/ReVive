@@ -9,20 +9,20 @@
     <ui:define name="content">
 
         <!-- Hero Banner -->
-        <div style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 60%, #3b82f6 100%); border-radius: 8px; padding: 36px 40px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; overflow: hidden; position: relative;">
+        <div style="background: linear-gradient(135deg, #329D90 0%, #3AB6A7 60%, #8CC63F 100%); border-radius: 12px; padding: 40px 48px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; overflow: hidden; position: relative;">
             <div style="position:relative; z-index:1;">
-                <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:rgba(255,255,255,0.7); margin-bottom:8px;">Sustainable Shopping</div>
-                <h1 style="font-size:2.2rem; font-weight:800; color:#fff; margin:0 0 10px; line-height:1.2;">Quality Pre-Owned<br/>Products at Best Prices</h1>
-                <p style="color:rgba(255,255,255,0.8); font-size:14px; margin:0 0 20px;">Discover secondhand treasures from verified sellers.</p>
-                <a href="register.xhtml" style="background:#f97316; color:white; font-weight:700; padding:10px 24px; border-radius:4px; text-decoration:none; font-size:14px; display:inline-block; transition:background 0.15s;">Start Selling</a>
+                <div style="font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:2px; color:#1B1E2E; margin-bottom:12px;">Sustainable Shopping</div>
+                <h1 style="font-size:2.5rem; font-weight:800; color:#ffffff; margin:0 0 16px; line-height:1.2; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">Quality Pre-Owned<br/>Products at Best Prices</h1>
+                <p style="color:#ffffff; font-size:16px; font-weight:500; margin:0 0 24px; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">Discover secondhand treasures from verified sellers.</p>
+                <a href="register.xhtml" style="background:#f97316; color:white; font-weight:800; padding:12px 28px; border-radius:8px; text-decoration:none; font-size:15px; display:inline-block; transition:background 0.2s; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);">Start Selling</a>
             </div>
-            <i class="bi bi-recycle" style="font-size:7rem; color:rgba(255,255,255,0.08); position:absolute; right:40px; top:50%; transform:translateY(-50%);"></i>
+            <img src="#{request.contextPath}/images/transparent.png" style="height:120px; opacity:0.9; position:relative; z-index:1;" />
         </div>
 
         <!-- Product Section -->
         <div class="section-header">
-            <span class="section-title"><i class="bi bi-grid-3x3-gap-fill" style="color:#2563eb; margin-right:8px;"></i>All Listings</span>
-            <span style="font-size:12px; color:#6b7280;">Approved &amp; Ready to Buy</span>
+            <span class="section-title"><i class="bi bi-grid-3x3-gap-fill" style="color:var(--primary); margin-right:8px;"></i>All Listings</span>
+            <span style="font-size:12px; color:var(--muted);">Approved &amp; Ready to Buy</span>
         </div>
 
         <h:form id="productForm">
@@ -40,9 +40,11 @@
                         <h:link outcome="product.xhtml" style="display:block; text-decoration:none; color:inherit;">
                             <f:param name="id" value="#{product.productid}" />
                             <!-- Condition Badge -->
-                            <span class="tile-badge #{product.productCondition eq 'New' ? 'new' : (product.productCondition eq 'Like New' ? 'like-new' : (product.productCondition eq 'Good' ? 'good' : (product.productCondition eq 'Fair' ? 'fair' : 'poor')))}">
-                                #{product.productCondition}
-                            </span>
+                            <h:panelGroup rendered="#{not empty product.productCondition}">
+                                <span class="tile-badge #{product.productCondition eq 'New' ? 'new' : (product.productCondition eq 'Like New' ? 'like-new' : (product.productCondition eq 'Good' ? 'good' : (product.productCondition eq 'Fair' ? 'fair' : 'poor')))}">
+                                    #{product.productCondition}
+                                </span>
+                            </h:panelGroup>
 
                             <!-- Image Carousel -->
                             <div class="tile-carousel" data-images="#{product.imageUrl}" data-title="#{product.title}">

@@ -16,18 +16,19 @@
             /* ── Reset &amp; Base ───────────────────────── */
             *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
             :root {
-                --primary:      #2563eb;
-                --primary-dark: #1d4ed8;
-                --accent:       #f97316;
-                --bg:           #f3f4f6;
+                --primary:      #3AB6A7; /* Teal */
+                --primary-dark: #329D90;
+                --accent:       #1B1E2E; /* Dark Navy */
+                --secondary:    #8CC63F; /* Lime */
+                --bg:           #f8fafc;
                 --surface:      #ffffff;
-                --border:       #e5e7eb;
-                --text:         #111827;
-                --muted:        #6b7280;
-                --success:      #16a34a;
-                --radius-sm:    4px;
-                --radius:       8px;
-                --nav-h:        56px;
+                --border:       #e2e8f0;
+                --text:         #0f172a;
+                --muted:        #64748b;
+                --success:      #8CC63F;
+                --radius-sm:    6px;
+                --radius:       12px;
+                --nav-h:        70px;
             }
             body {
                 font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -39,38 +40,43 @@
 
             /* ── Top Nav ──────────────────────────────── */
             .topnav {
-                background: var(--primary);
+                background: var(--surface);
                 height: var(--nav-h);
                 display: flex;
                 align-items: center;
-                padding: 0 24px;
-                gap: 16px;
+                padding: 0 32px;
+                gap: 24px;
                 position: sticky;
                 top: 0;
                 z-index: 1000;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                border-bottom: 1px solid var(--border);
             }
             .brand {
-                color: #fff;
-                font-size: 1.4rem;
-                font-weight: 800;
-                text-decoration: none;
-                white-space: nowrap;
                 display: flex;
                 align-items: center;
-                gap: 6px;
-                letter-spacing: -0.5px;
+                text-decoration: none;
             }
-            .brand:hover { text-decoration: none; color: #fff; }
+            .brand img {
+                height: 40px;
+                display: block;
+            }
 
             /* Search bar */
             .nav-search {
                 flex: 1;
                 display: flex;
-                max-width: 700px;
-                height: 38px;
-                border-radius: var(--radius-sm);
+                max-width: 600px;
+                height: 42px;
+                border-radius: 8px;
                 overflow: hidden;
+                border: 1px solid var(--border);
+                background: var(--bg);
+                transition: border-color 0.2s;
+            }
+            .nav-search:focus-within {
+                border-color: var(--primary);
+                box-shadow: 0 0 0 3px rgba(58, 182, 167, 0.1);
             }
             .nav-search .ui-autocomplete {
                 flex: 1;
@@ -80,79 +86,81 @@
             .nav-search .ui-autocomplete input {
                 flex: 1;
                 border: none !important;
+                background: transparent !important;
                 outline: none !important;
-                padding: 0 14px !important;
+                padding: 0 16px !important;
                 font-size: 14px !important;
                 height: 100% !important;
                 width: 100% !important;
                 border-radius: 0 !important;
                 box-shadow: none !important;
+                color: var(--text) !important;
             }
             .nav-search button {
-                background: var(--accent);
+                background: var(--primary);
                 border: none;
-                padding: 0 16px;
+                padding: 0 20px;
                 cursor: pointer;
                 color: white;
                 font-size: 16px;
-                transition: background 0.15s;
+                transition: background 0.2s;
             }
-            .nav-search button:hover { background: #ea6c00; }
+            .nav-search button:hover { background: var(--primary-dark); }
 
             /* Nav links */
             .nav-links {
                 display: flex;
                 align-items: center;
-                gap: 4px;
+                gap: 8px;
                 margin-left: auto;
             }
             .nav-item {
-                color: rgba(255,255,255,0.92);
+                color: var(--text);
                 text-decoration: none;
                 font-weight: 600;
-                font-size: 13px;
-                padding: 6px 12px;
+                font-size: 14px;
+                padding: 8px 16px;
                 border-radius: var(--radius-sm);
-                transition: background 0.15s;
+                transition: all 0.2s;
                 white-space: nowrap;
             }
-            .nav-item:hover { background: rgba(255,255,255,0.15); color: #fff; text-decoration: none; }
-            .nav-item.active { background: rgba(255,255,255,0.2); color: #fff; }
-            .nav-item-danger { color: #fca5a5 !important; }
-            .nav-item-danger:hover { background: rgba(239,68,68,0.2) !important; }
+            .nav-item:hover { background: var(--bg); color: var(--primary); text-decoration: none; }
+            .nav-item.active { background: #e2e8f0; color: var(--accent); }
+            .nav-item-danger { color: #ef4444 !important; }
+            .nav-item-danger:hover { background: #fee2e2 !important; color: #dc2626 !important; }
             .btn-login {
                 background: var(--accent);
                 color: white !important;
                 border-radius: var(--radius-sm);
-                padding: 6px 16px;
+                padding: 8px 20px;
                 font-weight: 700;
-                font-size: 13px;
+                font-size: 14px;
                 text-decoration: none;
-                transition: background 0.15s;
+                transition: background 0.2s;
             }
-            .btn-login:hover { background: #ea6c00; text-decoration: none; color: white; }
+            .btn-login:hover { background: #0f172a; text-decoration: none; color: white; }
 
             /* Sub-nav bar */
             .subnav {
-                background: #1e3a8a;
-                padding: 0 24px;
+                background: var(--accent);
+                padding: 0 32px;
                 display: flex;
                 align-items: center;
-                gap: 8px;
-                height: 36px;
+                gap: 12px;
+                height: 40px;
                 overflow-x: auto;
             }
             .subnav-item {
-                color: rgba(255,255,255,0.85);
+                color: rgba(255,255,255,0.8);
                 text-decoration: none;
-                font-size: 12.5px;
+                font-size: 13px;
                 font-weight: 500;
-                padding: 4px 10px;
-                border-radius: var(--radius-sm);
+                padding: 4px 12px;
+                border-radius: 20px;
                 white-space: nowrap;
-                transition: background 0.15s;
+                transition: all 0.2s;
             }
-            .subnav-item:hover { background: rgba(255,255,255,0.15); color: #fff; }
+            .subnav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
 
             /* ── Layout ───────────────────────────────── */
             .page-content { max-width: 1440px; margin: 0 auto; padding: 20px 24px; min-height: 80vh; }
@@ -726,7 +734,9 @@
     <h:body>
         <!-- Top Navigation -->
         <div class="topnav">
-            <a href="index.xhtml" class="brand"><i class="bi bi-recycle"></i> ReVive</a>
+            <a href="index.xhtml" class="brand">
+                <img src="#{request.contextPath}/images/transparent.png" alt="ReVive Logo" />
+            </a>
 
             <div class="nav-search">
                 <form action="search.xhtml" method="GET" style="display:flex; width:100%; height:100%; margin:0;">

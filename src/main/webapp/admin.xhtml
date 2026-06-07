@@ -12,7 +12,76 @@
 
             <div class="px-3 py-3">
                 <p:tabView id="adminTabView" styleClass="shadow-2 border-round-xl overflow-hidden">
-                    
+                    <!-- Tab 0: Product Stats -->
+                    <p:tab title="Product Stats">
+                        <div class="p-4 bg-gray-50 border-round-lg shadow-1" style="min-height: 400px;">
+                            <h2 class="text-2xl font-bold mb-4 text-gray-800"><i class="pi pi-chart-bar text-primary text-xl mr-2"></i>Product Statistics Dashboard</h2>
+                            <div class="grid">
+                                <!-- Total Products -->
+                                <div class="col-12 md:col-6 lg:col-3">
+                                    <div class="surface-card shadow-2 p-3 border-round border-top-3 border-blue-500 h-full flex flex-column justify-content-between">
+                                        <div class="flex justify-content-between mb-3">
+                                            <div>
+                                                <span class="block text-500 font-medium mb-3">Total Products</span>
+                                                <div class="text-900 font-bold text-4xl">#{adminBean.totalProductsCount}</div>
+                                            </div>
+                                            <div class="flex align-items-center justify-content-center bg-blue-100 border-round" style="width:2.5rem;height:2.5rem">
+                                                <i class="pi pi-box text-blue-500 text-xl"></i>
+                                            </div>
+                                        </div>
+                                        <span class="text-500 text-sm">All items submitted by sellers</span>
+                                    </div>
+                                </div>
+                                <!-- Approved -->
+                                <div class="col-12 md:col-6 lg:col-3">
+                                    <div class="surface-card shadow-2 p-3 border-round border-top-3 border-green-500 h-full flex flex-column justify-content-between">
+                                        <div class="flex justify-content-between mb-3">
+                                            <div>
+                                                <span class="block text-500 font-medium mb-3">Approved</span>
+                                                <div class="text-900 font-bold text-4xl text-green-600">#{adminBean.approvedProductsCount}</div>
+                                            </div>
+                                            <div class="flex align-items-center justify-content-center bg-green-100 border-round" style="width:2.5rem;height:2.5rem">
+                                                <i class="pi pi-check-circle text-green-500 text-xl"></i>
+                                            </div>
+                                        </div>
+                                        <span class="text-green-500 font-medium">#{adminBean.totalProductsCount > 0 ? (adminBean.approvedProductsCount * 100 / adminBean.totalProductsCount) : 0}% </span>
+                                        <span class="text-500 text-sm">of total</span>
+                                    </div>
+                                </div>
+                                <!-- Pending -->
+                                <div class="col-12 md:col-6 lg:col-3">
+                                    <div class="surface-card shadow-2 p-3 border-round border-top-3 border-orange-500 h-full flex flex-column justify-content-between">
+                                        <div class="flex justify-content-between mb-3">
+                                            <div>
+                                                <span class="block text-500 font-medium mb-3">Pending Review</span>
+                                                <div class="text-900 font-bold text-4xl text-orange-600">#{adminBean.pendingProductsCount}</div>
+                                            </div>
+                                            <div class="flex align-items-center justify-content-center bg-orange-100 border-round" style="width:2.5rem;height:2.5rem">
+                                                <i class="pi pi-clock text-orange-500 text-xl"></i>
+                                            </div>
+                                        </div>
+                                        <span class="text-orange-500 font-medium">#{adminBean.pendingProductsCount > 0 ? 'Needs Attention' : 'All clear'}</span>
+                                    </div>
+                                </div>
+                                <!-- Rejected -->
+                                <div class="col-12 md:col-6 lg:col-3">
+                                    <div class="surface-card shadow-2 p-3 border-round border-top-3 border-red-500 h-full flex flex-column justify-content-between">
+                                        <div class="flex justify-content-between mb-3">
+                                            <div>
+                                                <span class="block text-500 font-medium mb-3">Rejected</span>
+                                                <div class="text-900 font-bold text-4xl text-red-600">#{adminBean.rejectedProductsCount}</div>
+                                            </div>
+                                            <div class="flex align-items-center justify-content-center bg-red-100 border-round" style="width:2.5rem;height:2.5rem">
+                                                <i class="pi pi-times-circle text-red-500 text-xl"></i>
+                                            </div>
+                                        </div>
+                                        <span class="text-500 text-sm">Did not meet guidelines</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </p:tab>
+
                     <!-- Tab 1: Products Inventory & Approvals -->
                     <p:tab title="Inventory &amp; Approvals">
                         <p:dataTable id="productsTable" widgetVar="dtProducts"

@@ -68,11 +68,13 @@ public class ProductManagedBean implements Serializable {
 
     public void filterProducts() {
         if (searchKeyword == null || searchKeyword.trim().isEmpty()) {
-            filteredProducts = new ArrayList<>(approvedProducts);
+            filteredProducts = approvedProducts.stream()
+                    .filter(p -> p.getQuantity() != null && p.getQuantity() > 0)
+                    .collect(Collectors.toList());
         } else {
             String q = searchKeyword.toLowerCase().trim();
             filteredProducts = approvedProducts.stream()
-                    .filter(p -> p.getTitle().toLowerCase().contains(q))
+                    .filter(p -> p.getTitle().toLowerCase().contains(q) && p.getQuantity() != null && p.getQuantity() > 0)
                     .collect(Collectors.toList());
         }
     }
