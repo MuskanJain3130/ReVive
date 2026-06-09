@@ -53,6 +53,7 @@ public class CheckoutBean implements Serializable {
     private String razorpayOrderId;
     private String razorpayKeyId = util.SmsService.getEnv("RAZORPAY_KEY_ID");
     private String razorpayKeySecret = util.SmsService.getEnv("RAZORPAY_KEY_SECRET");
+    private String razorpayPaymentId;
     
     private String paymentMethod = "online"; // "online" or "cod"
 
@@ -197,7 +198,10 @@ public class CheckoutBean implements Serializable {
             
             if ("online".equals(paymentMethod)) {
                 payment.setPaymentMode("Razorpay");
-                payment.setPaymentStatus("Paid");
+                payment.setPaymentStatus("Completed");
+                String actualPaymentId = (paymentId != null && !paymentId.trim().isEmpty() && !"from_js".equals(paymentId)) 
+                                         ? paymentId : razorpayPaymentId;
+                payment.setRazorpayPaymentId(actualPaymentId);
             } else {
                 payment.setPaymentMode("COD");
                 payment.setPaymentStatus("Pending");
@@ -237,10 +241,13 @@ public class CheckoutBean implements Serializable {
             message.addRecipient(jakarta.mail.Message.RecipientType.TO, new jakarta.mail.internet.InternetAddress(toEmail));
             message.setSubject("Order Confirmation - ReVive", "UTF-8");
             
+            String paymentStr = "online".equals(paymentMethod) ? "Online Payment (Razorpay)" : "Cash on Delivery (COD)";
+            String amountLabel = "online".equals(paymentMethod) ? "Amount Paid:" : "Total Amount to be Paid:";
+            
             String htmlContent = "<h3>Dear Customer,</h3>" +
                     "<p>Thank you for shopping with ReVive Marketplace!</p>" +
-                    "<p>Your order <strong>#" + orderId + "</strong> has been successfully placed via <strong>Cash on Delivery (COD)</strong>.</p>" +
-                    "<p><strong>Total Amount to be Paid:</strong> INR " + totalAmount + "</p>" +
+                    "<p>Your order <strong>#" + orderId + "</strong> has been successfully placed via <strong>" + paymentStr + "</strong>.</p>" +
+                    "<p><strong>" + amountLabel + "</strong> INR " + totalAmount + "</p>" +
                     "<p>We will pack and ship your items shortly.</p>" +
                     "<br/>" +
                     "<p>Best regards,<br/>ReVive Team</p>";
@@ -336,6 +343,8 @@ public class CheckoutBean implements Serializable {
     public boolean isShowNewAddressForm() { return showNewAddressForm; }
     public String getRazorpayOrderId() { return razorpayOrderId; }
     public String getRazorpayKeyId() { return razorpayKeyId; }
+    public String getRazorpayPaymentId() { return razorpayPaymentId; }
+    public void setRazorpayPaymentId(String razorpayPaymentId) { this.razorpayPaymentId = razorpayPaymentId; }
     public String getPaymentMethod() { return paymentMethod; }
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
 

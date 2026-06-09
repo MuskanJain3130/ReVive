@@ -62,6 +62,9 @@ public class Payments implements Serializable {
     @JoinColumn(name = "orderid", referencedColumnName = "orderid")
     @ManyToOne
     private Orders orderid;
+    @Size(max = 100)
+    @Column(name = "razorpay_payment_id")
+    private String razorpayPaymentId;
 
     public Payments() {
     }
@@ -121,6 +124,14 @@ public class Payments implements Serializable {
 
     public void setOrderid(Orders orderid) {
         this.orderid = orderid;
+    }
+
+    public String getRazorpayPaymentId() {
+        return razorpayPaymentId;
+    }
+
+    public void setRazorpayPaymentId(String razorpayPaymentId) {
+        this.razorpayPaymentId = razorpayPaymentId;
     }
 
     @Override

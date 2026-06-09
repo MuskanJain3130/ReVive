@@ -8,10 +8,27 @@ import io.github.cdimascio.dotenv.Dotenv;
 public class SmsService {
 
     // Load .env variables. If .env is not found, it falls back to system environment variables.
-    private static final Dotenv dotenv = Dotenv.configure()
-            .directory("d:/ReVive")
-            .ignoreIfMissing()
-            .load();
+    private static Dotenv loadDotenv() {
+        String[] potentialPaths = {
+            ".",
+            "/Users/muskanjain/Files From d.localized/ReVive/ReVive",
+            "d:/ReVive"
+        };
+        for (String path : potentialPaths) {
+            try {
+                java.io.File file = new java.io.File(path + "/.env");
+                if (file.exists()) {
+                    System.out.println("[ReVive Dotenv] Loading .env from: " + file.getAbsolutePath());
+                    return Dotenv.configure().directory(path).ignoreIfMissing().load();
+                }
+            } catch (Exception e) {
+                // Ignore and try next path
+            }
+        }
+        return Dotenv.configure().ignoreIfMissing().load();
+    }
+
+    private static final Dotenv dotenv = loadDotenv();
 
     public static String getEnv(String key) {
         String val = dotenv.get(key);
