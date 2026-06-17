@@ -118,7 +118,7 @@ public class UserBean implements UserBeanLocal {
     @Override
     public List<Products> myProducts(int userId) {
         return em.createQuery(
-                "SELECT p FROM Products p WHERE p.sellerid.userid = :id",
+                "SELECT p FROM Products p WHERE p.sellerid.userid = :id ORDER BY p.productid DESC",
                 Products.class)
                 .setParameter("id", userId)
                 .getResultList();
